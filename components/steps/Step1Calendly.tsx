@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Script from "next/script";
 
 interface Props {
   completed: boolean;
@@ -34,22 +35,16 @@ export default function Step1Calendly({ completed, completing, onComplete }: Pro
         </p>
       </div>
 
-      {/* Calendly embed placeholder */}
-      <div className="rounded-xl overflow-hidden border border-[#222] bg-[#0a0a0a] min-h-[600px] flex items-center justify-center">
-        {/*
-          REPLACE THIS DIV with your Calendly embed code.
-          Your embed code will look like:
-          <div className="calendly-inline-widget" data-url="https://calendly.com/your-link" style={{minWidth:'320px',height:'630px'}}></div>
-          <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
-        */}
-        <div className="text-center px-8 py-12">
-          <div className="text-4xl mb-4">📅</div>
-          <p className="text-[#555] text-sm font-medium mb-2">Calendly embed goes here</p>
-          <p className="text-[#444] text-xs max-w-xs">
-            Replace this placeholder with your Calendly inline widget embed code
-          </p>
-        </div>
+      {/* Booking calendar embed */}
+      <div className="rounded-xl overflow-hidden border border-[#222] bg-[#0a0a0a] min-h-[600px]">
+        <iframe
+          src="https://api.leadconnectorhq.com/widget/booking/o0cWsep2uBig9iH9Nogy"
+          style={{ width: "100%", border: "none", overflow: "hidden", minHeight: "600px" }}
+          scrolling="no"
+          id="o0cWsep2uBig9iH9Nogy_1776208534477"
+        />
       </div>
+      <Script src="https://link.msgsndr.com/js/form_embed.js" strategy="lazyOnload" />
 
       {/* Action buttons */}
       {!choice ? (

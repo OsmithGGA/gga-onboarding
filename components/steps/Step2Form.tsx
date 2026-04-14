@@ -1,5 +1,7 @@
 "use client";
 
+import Script from "next/script";
+
 interface Props {
   completed: boolean;
   completing: boolean;
@@ -30,25 +32,18 @@ export default function Step2Form({ completed, completing, onComplete }: Props) 
         </p>
       </div>
 
-      {/* GoHighLevel form embed placeholder */}
-      <div className="rounded-xl overflow-hidden border border-[#222] bg-[#0a0a0a] min-h-[700px] flex items-center justify-center">
-        {/*
-          REPLACE THIS DIV with your GoHighLevel form embed code.
-          It will look something like:
-          <iframe src="https://api.leadconnectorhq.com/widget/form/YOUR_FORM_ID"
-            style={{width:'100%', height:'700px', border:'none', borderRadius:'12px'}}
-            id="inline-YOUR_FORM_ID"
-          />
-          <script src="https://link.msgsndr.com/js/form_embed.js" type="text/javascript"></script>
-        */}
-        <div className="text-center px-8 py-12">
-          <div className="text-4xl mb-4">📋</div>
-          <p className="text-[#555] text-sm font-medium mb-2">GoHighLevel form embed goes here</p>
-          <p className="text-[#444] text-xs max-w-xs">
-            Replace this placeholder with your GoHighLevel inline form embed code
-          </p>
-        </div>
+      {/* Onboarding form embed */}
+      <div className="rounded-xl overflow-hidden border border-[#222] bg-[#0a0a0a] min-h-[700px]">
+        <iframe
+          src="https://api.leadconnectorhq.com/widget/survey/kFYnxrKKQD6Hl4JqomgG"
+          style={{ border: "none", width: "100%", minHeight: "700px" }}
+          scrolling="no"
+          id="kFYnxrKKQD6Hl4JqomgG"
+          title="survey"
+        />
       </div>
+
+      <Script src="https://link.msgsndr.com/js/form_embed.js" strategy="lazyOnload" />
 
       {/* Complete button */}
       <button
