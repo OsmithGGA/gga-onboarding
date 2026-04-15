@@ -33,7 +33,10 @@ export async function createClientFolderStructure(
   const drive = google.drive({ version: "v3", auth });
   const sheets = google.sheets({ version: "v4", auth });
 
-  const parentFolderId = process.env.GOOGLE_DRIVE_PARENT_FOLDER_ID!;
+  // Accept either a full Drive URL or just the folder ID
+  const raw = process.env.GOOGLE_DRIVE_PARENT_FOLDER_ID!;
+  const folderIdMatch = raw.match(/folders\/([a-zA-Z0-9_-]+)/);
+  const parentFolderId = folderIdMatch ? folderIdMatch[1] : raw;
 
   // 1. Create main client folder /Clients/{ClientName}/
   const clientFolder = await drive.files.create({
@@ -114,10 +117,11 @@ async function createLeadTrackerSheet(
     requestBody: {
       properties: { title: `Lead Tracker - ${clientName}` },
     },
-    fields: "spreadsheetId, spreadsheetUrl",
+    fields: "spreadsheetId",
   });
   const spreadsheetId = spreadsheet.data.spreadsheetId!;
-  const spreadsheetUrl = spreadsheet.data.spreadsheetUrl!;
+  // Construct URL from ID — spreadsheetUrl field isn't reliably returned by create
+  const spreadsheetUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit`;
 
   // Move into the client folder
   const fileMetadata = await drive.files.get({
