@@ -52,6 +52,8 @@ const defaultForm = {
   password: "",
   country: "ireland",
   currency: "€",
+  paymentType: "monthly" as "monthly" | "paid_in_full",
+  fullPaymentAmount: "",
   depositAmount: "",
   month1Remainder: "",
   month2Amount: "",
@@ -124,10 +126,20 @@ export default function AdminClient({ adminPassword }: { adminPassword: string }
     setError("");
     setSuccess("");
 
+    // If Paid in Full, use fullPaymentAmount as depositAmount and clear monthly fields
+    const payload = { ...form };
+    if (form.paymentType === "paid_in_full") {
+      payload.depositAmount = form.fullPaymentAmount;
+      payload.month1Remainder = "";
+      payload.month2Amount = "";
+      payload.month3Amount = "";
+      payload.paymentDueDate = "";
+    }
+
     const res = await fetch("/api/clients", {
       method: "POST",
       headers: { "Content-Type": "application/json", ...authHeaders },
-      body: JSON.stringify(form),
+      body: JSON.stringify(payload),
     });
 
     const data = await res.json();
@@ -509,29 +521,61 @@ export default function AdminClient({ adminPassword }: { adminPassword: string }
                       <label className="block text-xs text-[#888] mb-1.5">Contract Length</label>
                       <div className="bg-[#0a0a0a] border border-[#222] rounded-xl px-3 py-2.5 text-[#555] text-sm">90 Days (fixed)</div>
                     </div>
-                    <div>
-                      <label className="block text-xs text-[#888] mb-1.5">Deposit Amount</label>
-                      <input type="number" step="0.01" value={form.depositAmount} onChange={(e) => setForm({ ...form, depositAmount: e.target.value })} placeholder="0.00" className="w-full bg-[#0a0a0a] border border-[#222] rounded-xl px-3 py-2.5 text-white text-sm placeholder-[#444] focus:outline-none focus:border-[#ADFF00] transition-colors" />
+
+                    {/* Payment type toggle */}
+                    <div className="col-span-2">
+                      <label className="block text-xs text-[#888] mb-1.5">Payment Structure</label>
+                      <div className="flex gap-2">
+                        {(["monthly", "paid_in_full"] as const).map((type) => (
+                          <button
+                            key={type}
+                            type="button"
+                            onClick={() => setForm({ ...form, paymentType: type })}
+                            className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-colors ${
+                              form.paymentType === type
+                                ? "bg-[#ADFF00]/10 border-[#ADFF00] text-[#ADFF00]"
+                                : "bg-[#0a0a0a] border-[#222] text-[#555] hover:border-[#333]"
+                            }`}
+                          >
+                            {type === "monthly" ? "Monthly Payments" : "Paid in Full"}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-xs text-[#888] mb-1.5">Month 1 Remainder</label>
-                      <input type="number" step="0.01" value={form.month1Remainder} onChange={(e) => setForm({ ...form, month1Remainder: e.target.value })} placeholder="0.00" className="w-full bg-[#0a0a0a] border border-[#222] rounded-xl px-3 py-2.5 text-white text-sm placeholder-[#444] focus:outline-none focus:border-[#ADFF00] transition-colors" />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-[#888] mb-1.5">Month 2 Amount</label>
-                      <input type="number" step="0.01" value={form.month2Amount} onChange={(e) => setForm({ ...form, month2Amount: e.target.value })} placeholder="0.00" className="w-full bg-[#0a0a0a] border border-[#222] rounded-xl px-3 py-2.5 text-white text-sm placeholder-[#444] focus:outline-none focus:border-[#ADFF00] transition-colors" />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-[#888] mb-1.5">Month 3 Amount</label>
-                      <input type="number" step="0.01" value={form.month3Amount} onChange={(e) => setForm({ ...form, month3Amount: e.target.value })} placeholder="0.00" className="w-full bg-[#0a0a0a] border border-[#222] rounded-xl px-3 py-2.5 text-white text-sm placeholder-[#444] focus:outline-none focus:border-[#ADFF00] transition-colors" />
-                    </div>
+
+                    {form.paymentType === "paid_in_full" ? (
+                      <div className="col-span-2">
+                        <label className="block text-xs text-[#888] mb-1.5">Full Payment Amount</label>
+                        <input type="number" step="0.01" value={form.fullPaymentAmount} onChange={(e) => setForm({ ...form, fullPaymentAmount: e.target.value })} placeholder="0.00" className="w-full bg-[#0a0a0a] border border-[#222] rounded-xl px-3 py-2.5 text-white text-sm placeholder-[#444] focus:outline-none focus:border-[#ADFF00] transition-colors" />
+                        <p className="text-xs text-[#555] mt-1">Paid in full — no monthly invoices. This amount will appear in the contract.</p>
+                      </div>
+                    ) : (
+                      <>
+                        <div>
+                          <label className="block text-xs text-[#888] mb-1.5">Deposit Amount</label>
+                          <input type="number" step="0.01" value={form.depositAmount} onChange={(e) => setForm({ ...form, depositAmount: e.target.value })} placeholder="0.00" className="w-full bg-[#0a0a0a] border border-[#222] rounded-xl px-3 py-2.5 text-white text-sm placeholder-[#444] focus:outline-none focus:border-[#ADFF00] transition-colors" />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-[#888] mb-1.5">Month 1 Remainder</label>
+                          <input type="number" step="0.01" value={form.month1Remainder} onChange={(e) => setForm({ ...form, month1Remainder: e.target.value })} placeholder="0.00" className="w-full bg-[#0a0a0a] border border-[#222] rounded-xl px-3 py-2.5 text-white text-sm placeholder-[#444] focus:outline-none focus:border-[#ADFF00] transition-colors" />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-[#888] mb-1.5">Month 2 Amount</label>
+                          <input type="number" step="0.01" value={form.month2Amount} onChange={(e) => setForm({ ...form, month2Amount: e.target.value })} placeholder="0.00" className="w-full bg-[#0a0a0a] border border-[#222] rounded-xl px-3 py-2.5 text-white text-sm placeholder-[#444] focus:outline-none focus:border-[#ADFF00] transition-colors" />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-[#888] mb-1.5">Month 3 Amount</label>
+                          <input type="number" step="0.01" value={form.month3Amount} onChange={(e) => setForm({ ...form, month3Amount: e.target.value })} placeholder="0.00" className="w-full bg-[#0a0a0a] border border-[#222] rounded-xl px-3 py-2.5 text-white text-sm placeholder-[#444] focus:outline-none focus:border-[#ADFF00] transition-colors" />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-[#888] mb-1.5">Payment Due Date <span className="text-[#444] normal-case">(day of month)</span></label>
+                          <input type="number" min="1" max="31" value={form.paymentDueDate} onChange={(e) => setForm({ ...form, paymentDueDate: e.target.value })} placeholder="1–31" className="w-full bg-[#0a0a0a] border border-[#222] rounded-xl px-3 py-2.5 text-white text-sm placeholder-[#444] focus:outline-none focus:border-[#ADFF00] transition-colors" />
+                        </div>
+                      </>
+                    )}
                     <div>
                       <label className="block text-xs text-[#888] mb-1.5">Daily Ad Budget <span className="text-[#444] normal-case">(client pays Meta)</span></label>
                       <input type="number" step="0.01" value={form.dailyAdBudget} onChange={(e) => setForm({ ...form, dailyAdBudget: e.target.value })} placeholder="0.00" className="w-full bg-[#0a0a0a] border border-[#222] rounded-xl px-3 py-2.5 text-white text-sm placeholder-[#444] focus:outline-none focus:border-[#ADFF00] transition-colors" />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-[#888] mb-1.5">Payment Due Date <span className="text-[#444] normal-case">(day of month)</span></label>
-                      <input type="number" min="1" max="31" value={form.paymentDueDate} onChange={(e) => setForm({ ...form, paymentDueDate: e.target.value })} placeholder="1–31" className="w-full bg-[#0a0a0a] border border-[#222] rounded-xl px-3 py-2.5 text-white text-sm placeholder-[#444] focus:outline-none focus:border-[#ADFF00] transition-colors" />
                     </div>
                   </div>
                 </div>

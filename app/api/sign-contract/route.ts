@@ -7,6 +7,25 @@ import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 // Allow up to 30s for PDF generation + Drive upload
 export const maxDuration = 30;
 
+function generatePaymentSection(client: Record<string, unknown>): string {
+  const currency = (client.currency as string) || "€";
+  const isPaidInFull = !client.month2_amount && !client.month3_amount && client.deposit_amount;
+
+  if (isPaidInFull) {
+    return `PAID IN FULL\nTotal amount: ${currency}${client.deposit_amount} — paid in full prior to or at time of signing.\nNo further payments are due for the duration of this agreement.`;
+  }
+
+  const dueDate = (client.payment_due_date as string)?.toString() || "TBD";
+  const lines = [
+    client.deposit_amount ? `Deposit: ${currency}${client.deposit_amount} — Due at signing` : "",
+    client.month1_remainder ? `Month 1 Remainder: ${currency}${client.month1_remainder} — Due ${dueDate} of Month 1` : "",
+    client.month2_amount ? `Month 2: ${currency}${client.month2_amount} — Due ${dueDate} of Month 2` : "",
+    client.month3_amount ? `Month 3: ${currency}${client.month3_amount} — Due ${dueDate} of Month 3` : "",
+  ].filter(Boolean).join("\n");
+
+  return lines + "\n\nNote: Late payments may result in the campaign being paused until the outstanding balance is cleared.";
+}
+
 // Strip HTML tags for plain-text PDF rendering
 function htmlToPlainText(html: string): string {
   return html
@@ -149,7 +168,8 @@ export async function POST(request: Request) {
       .replace(/\{Month1Remainder\}/g, client.month1_remainder?.toString() || "TBD")
       .replace(/\{Month2Amount\}/g, client.month2_amount?.toString() || "TBD")
       .replace(/\{Month3Amount\}/g, client.month3_amount?.toString() || "TBD")
-      .replace(/\{PaymentDueDate\}/g, client.payment_due_date?.toString() || "TBD");
+      .replace(/\{PaymentDueDate\}/g, client.payment_due_date?.toString() || "TBD")
+      .replace(/\{PaymentSection\}/g, generatePaymentSection(client as Record<string, unknown>));
 
     // Generate PDF using pdf-lib
     const pdfDoc = await PDFDocument.create();

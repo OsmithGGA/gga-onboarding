@@ -36,21 +36,16 @@ const UPLOAD_GUIDELINES = [
 ];
 
 export default function Step4Drive({ completed, completing, driveFolderUrl, onComplete }: Props) {
-  if (completed) {
-    return (
-      <div className="flex items-start gap-3 p-5 bg-[#ADFF00]/5 border border-[#ADFF00]/20 rounded-xl">
-        <svg className="w-5 h-5 text-[#ADFF00] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <p className="text-[#ADFF00] text-sm font-medium">
-          Content uploaded. Our team will review your assets ahead of your onboarding call.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
+      {completed && (
+        <div className="flex items-center gap-2 p-3 bg-[#ADFF00]/5 border border-[#ADFF00]/20 rounded-xl">
+          <svg className="w-4 h-4 text-[#ADFF00] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p className="text-[#ADFF00] text-xs font-medium">Assets uploaded — you can add more files to your Drive folder at any time below.</p>
+        </div>
+      )}
       {/* Intro */}
       <div className="space-y-3">
         <div className="flex items-center gap-2">
@@ -148,8 +143,8 @@ export default function Step4Drive({ completed, completing, driveFolderUrl, onCo
         Your folder is private and shared only with the GGA team.
       </p>
 
-      {/* Complete button */}
-      <button
+      {/* Complete button — only show if not yet completed */}
+      {!completed && <button
         onClick={onComplete}
         disabled={completing}
         className="w-full bg-[#ADFF00] hover:bg-[#8FCC00] text-black font-semibold py-3 px-6 rounded-xl transition-all duration-200 hover:shadow-[0_0_20px_rgba(173,255,0,0.4)] disabled:opacity-50 text-sm"
@@ -165,7 +160,7 @@ export default function Step4Drive({ completed, completing, driveFolderUrl, onCo
         ) : (
           "✅ I've uploaded my content"
         )}
-      </button>
+      </button>}
     </div>
   );
 }

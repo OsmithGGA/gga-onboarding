@@ -2,6 +2,41 @@ import { redirect } from "next/navigation";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import PortalClient from "@/components/PortalClient";
 
+function generatePaymentSection(client: Record<string, unknown>): string {
+  const currency = (client.currency as string) || "€";
+  const isPaidInFull = !client.month2_amount && !client.month3_amount && client.deposit_amount;
+
+  if (isPaidInFull) {
+    return `
+      <div style="background: #0f1a0a; border: 1px solid #ADFF00; border-radius: 10px; padding: 18px 20px; margin-bottom: 12px;">
+        <p style="margin: 0 0 8px; color: #ADFF00; font-weight: 700; font-size: 14px;">■ PAID IN FULL</p>
+        <p style="margin: 0; color: #bbb; font-size: 14px;">Total amount: <strong style="color: #fff; font-size: 16px;">${currency}${client.deposit_amount}</strong> — paid in full prior to or at time of signing.</p>
+      </div>
+      <p style="margin: 0; color: #888; font-size: 13px; font-style: italic;">No further payments are due for the duration of this agreement.</p>
+    `;
+  }
+
+  const dueDate = (client.payment_due_date as string)?.toString() || "TBD";
+  const rows = [
+    client.deposit_amount ? `<tr><td style="padding:10px 14px;border:1px solid #2a2a2a;color:#ccc;">Deposit</td><td style="padding:10px 14px;border:1px solid #2a2a2a;color:#ADFF00;font-weight:600;">${currency}${client.deposit_amount}</td><td style="padding:10px 14px;border:1px solid #2a2a2a;color:#ccc;">Due at signing</td></tr>` : "",
+    client.month1_remainder ? `<tr><td style="padding:10px 14px;border:1px solid #2a2a2a;color:#ccc;">Month 1 Remainder</td><td style="padding:10px 14px;border:1px solid #2a2a2a;color:#ADFF00;font-weight:600;">${currency}${client.month1_remainder}</td><td style="padding:10px 14px;border:1px solid #2a2a2a;color:#ccc;">${dueDate} of Month 1</td></tr>` : "",
+    client.month2_amount ? `<tr><td style="padding:10px 14px;border:1px solid #2a2a2a;color:#ccc;">Month 2</td><td style="padding:10px 14px;border:1px solid #2a2a2a;color:#ADFF00;font-weight:600;">${currency}${client.month2_amount}</td><td style="padding:10px 14px;border:1px solid #2a2a2a;color:#ccc;">${dueDate} of Month 2</td></tr>` : "",
+    client.month3_amount ? `<tr><td style="padding:10px 14px;border:1px solid #2a2a2a;color:#ccc;">Month 3</td><td style="padding:10px 14px;border:1px solid #2a2a2a;color:#ADFF00;font-weight:600;">${currency}${client.month3_amount}</td><td style="padding:10px 14px;border:1px solid #2a2a2a;color:#ccc;">${dueDate} of Month 3</td></tr>` : "",
+  ].filter(Boolean).join("");
+
+  return `
+    <table class="contract-fees" style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:12px;">
+      <thead><tr>
+        <th style="background:#1a1a1a;color:#fff;padding:10px 14px;text-align:left;border:1px solid #333;font-weight:600;">Payment</th>
+        <th style="background:#1a1a1a;color:#fff;padding:10px 14px;text-align:left;border:1px solid #333;font-weight:600;">Amount</th>
+        <th style="background:#1a1a1a;color:#fff;padding:10px 14px;text-align:left;border:1px solid #333;font-weight:600;">Due</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <p style="margin:0;color:#888;font-size:13px;font-style:italic;">Late payments may result in the campaign being paused until the outstanding balance is cleared.</p>
+  `;
+}
+
 function interpolateContract(template: string, client: Record<string, unknown>): string {
   if (!template) return "";
 
@@ -43,7 +78,8 @@ function interpolateContract(template: string, client: Record<string, unknown>):
     .replace(/\{Month1Remainder\}/g, (client.month1_remainder as string)?.toString() || "TBD")
     .replace(/\{Month2Amount\}/g, (client.month2_amount as string)?.toString() || "TBD")
     .replace(/\{Month3Amount\}/g, (client.month3_amount as string)?.toString() || "TBD")
-    .replace(/\{PaymentDueDate\}/g, (client.payment_due_date as string)?.toString() || "TBD");
+    .replace(/\{PaymentDueDate\}/g, (client.payment_due_date as string)?.toString() || "TBD")
+    .replace(/\{PaymentSection\}/g, generatePaymentSection(client));
 }
 
 export default async function PortalPage() {
