@@ -539,11 +539,10 @@ export default function AdminClient({ adminPassword }: { adminPassword: string }
                 {/* Section 3: Portal Setup */}
                 <div>
                   <h3 className="text-xs font-semibold text-[#555] uppercase tracking-wider mb-3">Portal Setup</h3>
+                  <div className="bg-[#ADFF00]/5 border border-[#ADFF00]/20 rounded-xl p-3 mb-3">
+                    <p className="text-xs text-[#ADFF00]">📁 Google Drive folder, Lead Tracker sheet, and Contracts folder are created automatically when you add the client.</p>
+                  </div>
                   <div className="space-y-3">
-                    <div>
-                      <label className="block text-xs text-[#888] mb-1.5">Google Drive Assets Folder URL <span className="text-[#444]">(paste client folder link — overrides auto-created)</span></label>
-                      <input type="url" value={form.driveAssetsUrl} onChange={(e) => setForm({ ...form, driveAssetsUrl: e.target.value })} placeholder="https://drive.google.com/drive/folders/..." className="w-full bg-[#0a0a0a] border border-[#222] rounded-xl px-3 py-2.5 text-white text-sm placeholder-[#444] focus:outline-none focus:border-[#ADFF00] transition-colors" />
-                    </div>
                     <div>
                       <label className="block text-xs text-[#888] mb-1.5">Contract / PandaDoc Notes</label>
                       <textarea value={form.pandadocNotes} onChange={(e) => setForm({ ...form, pandadocNotes: e.target.value })} placeholder="Any custom contract terms or notes..." rows={3} className="w-full bg-[#0a0a0a] border border-[#222] rounded-xl px-3 py-2.5 text-white text-sm placeholder-[#444] focus:outline-none focus:border-[#ADFF00] transition-colors resize-none" />

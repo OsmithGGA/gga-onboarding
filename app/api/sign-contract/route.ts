@@ -106,7 +106,7 @@ export async function POST(request: Request) {
     });
 
     // Fetch contract template (use admin client — RLS restricts service-role-only write)
-    const adminSupabase = await createAdminClient();
+    const adminSupabase = createAdminClient();
     const { data: templateRow } = await adminSupabase
       .from("contract_templates")
       .select("body")

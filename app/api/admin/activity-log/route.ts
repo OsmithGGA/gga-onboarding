@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "clientId is required" }, { status: 400 });
   }
 
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
   const { data: events, error } = await supabase
     .from("client_activity_log")
     .select("*")

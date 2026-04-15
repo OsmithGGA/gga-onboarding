@@ -108,7 +108,7 @@ export default async function PortalPage() {
   // Fetch and interpolate contract template (use admin client for service-role access)
   let contractHtml = "";
   try {
-    const adminSupabase = await createAdminClient();
+    const adminSupabase = createAdminClient();
     const { data: templateRow } = await adminSupabase
       .from("contract_templates")
       .select("body")

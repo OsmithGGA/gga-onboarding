@@ -42,7 +42,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const supabase = await createAdminClient();
+    const supabase = createAdminClient();
     const fullName = `${firstName} ${lastName}`;
 
     // 1. Create Supabase auth user (email_confirm: true skips confirmation email)
@@ -121,6 +121,8 @@ export async function POST(request: Request) {
       .single();
 
     if (clientError) {
+      // Clean up the auth user so admin can retry with same email
+      await supabase.auth.admin.deleteUser(userId);
       return NextResponse.json(
         { error: clientError.message },
         { status: 500 }
@@ -166,7 +168,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const supabase = await createAdminClient();
+    const supabase = createAdminClient();
     const url = new URL(request.url);
     const countryFilter = url.searchParams.get("country");
 
@@ -205,7 +207,7 @@ export async function PATCH(request: Request) {
     const { action, clientId, stepNumber, userId, ...rest } =
       await request.json();
 
-    const supabase = await createAdminClient();
+    const supabase = createAdminClient();
 
     if (action === "resend-welcome" || action === "reset-password") {
       // Trigger Supabase's built-in password reset email to the client

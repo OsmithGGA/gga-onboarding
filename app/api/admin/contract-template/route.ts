@@ -10,7 +10,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("contract_templates")
     .select("id, name, body, updated_at")
@@ -34,7 +34,7 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "body is required" }, { status: 400 });
   }
 
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
   const { error } = await supabase
     .from("contract_templates")
     .update({ body, updated_at: new Date().toISOString() })

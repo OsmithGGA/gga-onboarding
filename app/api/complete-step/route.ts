@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     }
 
     // Log to activity log (use admin client to bypass RLS)
-    const adminSupabase = await createAdminClient();
+    const adminSupabase = createAdminClient();
     await adminSupabase.from("client_activity_log").insert({
       client_id: clientId,
       event_type: "step_completed",
