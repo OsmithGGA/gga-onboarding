@@ -53,7 +53,7 @@ function wrapText(text: string, font: Awaited<ReturnType<typeof PDFDocument.prot
 
 export async function POST(request: Request) {
   try {
-    const { clientId, signatureName } = await request.json();
+    const { clientId, signatureName, signatureImage } = await request.json();
 
     if (!clientId || !signatureName?.trim()) {
       return NextResponse.json(
@@ -219,7 +219,7 @@ export async function POST(request: Request) {
     }
 
     // Signature block
-    checkPageBreak(120);
+    checkPageBreak(160);
     y -= 20;
     page.drawLine({
       start: { x: margin, y },
@@ -229,7 +229,7 @@ export async function POST(request: Request) {
     });
     y -= 20;
 
-    page.drawText("DIGITAL SIGNATURE", {
+    page.drawText("ELECTRONIC SIGNATURE", {
       x: margin,
       y,
       font: helveticaBold,
@@ -237,6 +237,37 @@ export async function POST(request: Request) {
       color: gray,
     });
     y -= 18;
+
+    // Embed drawn signature image if provided
+    if (signatureImage) {
+      try {
+        const base64Data = signatureImage.replace(/^data:image\/png;base64,/, "");
+        const imgBytes = Buffer.from(base64Data, "base64");
+        const embeddedImg = await pdfDoc.embedPng(imgBytes);
+        const sigWidth = 220;
+        const sigHeight = (embeddedImg.height / embeddedImg.width) * sigWidth;
+        checkPageBreak(sigHeight + 10);
+        // Draw light box behind signature
+        page.drawRectangle({
+          x: margin,
+          y: y - sigHeight,
+          width: sigWidth,
+          height: sigHeight,
+          color: rgb(0.97, 0.97, 0.97),
+          borderColor: rgb(0.8, 0.8, 0.8),
+          borderWidth: 0.5,
+        });
+        page.drawImage(embeddedImg, {
+          x: margin,
+          y: y - sigHeight,
+          width: sigWidth,
+          height: sigHeight,
+        });
+        y -= sigHeight + 12;
+      } catch (imgErr) {
+        console.warn("Could not embed signature image:", imgErr);
+      }
+    }
 
     page.drawText(`Signed by: ${signatureName}`, {
       x: margin,

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
-import { FileText, CheckCircle, Loader2, AlertCircle } from "lucide-react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { FileText, CheckCircle, Loader2, AlertCircle, RotateCcw } from "lucide-react";
 
 interface Client {
   id: string;
@@ -27,32 +27,104 @@ export default function Step0Contract({
   const [signatureName, setSignatureName] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
+  const [hasDrawnSignature, setHasDrawnSignature] = useState(false);
+  const [isDrawing, setIsDrawing] = useState(false);
   const [signing, setSigning] = useState(false);
   const [error, setError] = useState("");
-  const scrollRef = useRef<HTMLDivElement>(null);
 
-  const firstName =
-    client.first_name || client.name?.split(" ")[0] || "there";
-  const businessName =
-    client.business_name ||
-    `${client.first_name || ""} ${client.last_name || ""}`.trim() ||
-    client.name ||
-    "your business";
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const lastPos = useRef<{ x: number; y: number } | null>(null);
+
+  const firstName = client.first_name || client.name?.split(" ")[0] || "there";
+
+  // Fill canvas with white background on mount
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }, []);
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 30;
-    if (atBottom) setHasScrolledToBottom(true);
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 30) {
+      setHasScrolledToBottom(true);
+    }
   }, []);
 
+  // Get canvas-relative position accounting for DPI scaling
+  function getPos(e: React.MouseEvent | React.TouchEvent) {
+    const canvas = canvasRef.current!;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    if ("touches" in e) {
+      return {
+        x: (e.touches[0].clientX - rect.left) * scaleX,
+        y: (e.touches[0].clientY - rect.top) * scaleY,
+      };
+    }
+    return {
+      x: ((e as React.MouseEvent).clientX - rect.left) * scaleX,
+      y: ((e as React.MouseEvent).clientY - rect.top) * scaleY,
+    };
+  }
+
+  function startDrawing(e: React.MouseEvent | React.TouchEvent) {
+    e.preventDefault();
+    if (!hasScrolledToBottom) return;
+    setIsDrawing(true);
+    lastPos.current = getPos(e);
+  }
+
+  function draw(e: React.MouseEvent | React.TouchEvent) {
+    e.preventDefault();
+    if (!isDrawing || !lastPos.current) return;
+    const canvas = canvasRef.current!;
+    const ctx = canvas.getContext("2d")!;
+    const pos = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(lastPos.current.x, lastPos.current.y);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.strokeStyle = "#111111";
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.stroke();
+    lastPos.current = pos;
+    if (!hasDrawnSignature) setHasDrawnSignature(true);
+  }
+
+  function stopDrawing() {
+    setIsDrawing(false);
+    lastPos.current = null;
+  }
+
+  function clearSignature() {
+    const canvas = canvasRef.current!;
+    const ctx = canvas.getContext("2d")!;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    setHasDrawnSignature(false);
+  }
+
   const canSign =
-    hasScrolledToBottom && agreed && signatureName.trim().length > 2;
+    hasScrolledToBottom &&
+    agreed &&
+    signatureName.trim().length > 2 &&
+    hasDrawnSignature;
 
   async function handleSign() {
     if (!canSign) return;
     setError("");
     setSigning(true);
+
+    const canvas = canvasRef.current;
+    const signatureImage = canvas?.toDataURL("image/png") || "";
 
     try {
       const res = await fetch("/api/sign-contract", {
@@ -61,6 +133,7 @@ export default function Step0Contract({
         body: JSON.stringify({
           clientId: client.id,
           signatureName: signatureName.trim(),
+          signatureImage,
         }),
       });
 
@@ -110,10 +183,6 @@ export default function Step0Contract({
           securely and you&apos;ll receive a copy by email. This step must be
           completed before the rest of the portal unlocks.
         </p>
-        <p className="text-[#888] text-sm">
-          If you have any questions about the agreement before signing, reach out
-          to us directly and we&apos;ll clarify anything straight away.
-        </p>
       </div>
 
       {/* Scroll indicator */}
@@ -150,29 +219,76 @@ export default function Step0Contract({
 
       {/* Signature section */}
       <div
-        className={`space-y-4 transition-opacity duration-300 ${
+        className={`space-y-5 transition-opacity duration-300 ${
           hasScrolledToBottom ? "opacity-100" : "opacity-40 pointer-events-none"
         }`}
       >
         <div className="border-t border-[#1a1a1a] pt-5">
-          <p className="text-[#888] text-sm mb-4 font-medium">
+          <p className="text-[#888] text-sm mb-5 font-medium">
             By signing below, you confirm you have read and agree to all terms
             of this agreement.
           </p>
 
-          {/* Typed signature */}
-          <div className="mb-4">
+          {/* Full legal name */}
+          <div className="mb-5">
             <label className="block text-sm font-medium text-[#888] mb-2">
-              Type your full legal name to sign
+              Full legal name
             </label>
             <input
               type="text"
               value={signatureName}
               onChange={(e) => setSignatureName(e.target.value)}
               placeholder={`e.g. ${firstName} ${client.last_name || "Smith"}`}
-              className="w-full bg-[#0a0a0a] border border-[#333] rounded-xl px-4 py-3 text-white placeholder-[#333] text-sm focus:outline-none focus:border-[#ADFF00] focus:ring-1 focus:ring-[#ADFF00]/20 transition-colors font-medium"
+              className="w-full bg-[#0a0a0a] border border-[#333] rounded-xl px-4 py-3 text-white placeholder-[#333] text-sm focus:outline-none focus:border-[#ADFF00] focus:ring-1 focus:ring-[#ADFF00]/20 transition-colors"
               disabled={!hasScrolledToBottom}
             />
+          </div>
+
+          {/* Signature pad */}
+          <div className="mb-5">
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-[#888]">
+                Draw your signature
+              </label>
+              {hasDrawnSignature && (
+                <button
+                  type="button"
+                  onClick={clearSignature}
+                  className="flex items-center gap-1.5 text-xs text-[#555] hover:text-[#888] transition-colors"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  Clear
+                </button>
+              )}
+            </div>
+            <div className="relative border border-[#333] rounded-xl overflow-hidden bg-white">
+              <canvas
+                ref={canvasRef}
+                width={900}
+                height={180}
+                className="w-full touch-none cursor-crosshair block"
+                style={{ height: "140px" }}
+                onMouseDown={startDrawing}
+                onMouseMove={draw}
+                onMouseUp={stopDrawing}
+                onMouseLeave={stopDrawing}
+                onTouchStart={startDrawing}
+                onTouchMove={draw}
+                onTouchEnd={stopDrawing}
+              />
+              {!hasDrawnSignature && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <p className="text-[#bbb] text-sm select-none">
+                    Sign here with your mouse or finger
+                  </p>
+                </div>
+              )}
+            </div>
+            {hasScrolledToBottom && !hasDrawnSignature && (
+              <p className="text-[#555] text-xs mt-1.5">
+                Draw your signature in the box above
+              </p>
+            )}
           </div>
 
           {/* Checkbox */}
@@ -241,12 +357,12 @@ export default function Step0Contract({
             )}
           </button>
 
-          {!canSign && !signing && (
+          {!canSign && !signing && hasScrolledToBottom && (
             <p className="text-[#555] text-xs text-center mt-3">
-              {!hasScrolledToBottom
-                ? "Scroll through the full agreement above to enable signing"
-                : !signatureName.trim()
+              {!signatureName.trim()
                 ? "Enter your full legal name above"
+                : !hasDrawnSignature
+                ? "Draw your signature in the box above"
                 : !agreed
                 ? "Check the box above to confirm you agree"
                 : ""}
