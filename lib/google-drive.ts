@@ -85,13 +85,18 @@ export async function createClientFolderStructure(
   });
   const contractsFolderId = contractsFolder.data.id!;
 
-  // 4. Create Lead Tracker Google Sheet
-  const sheetUrl = await createLeadTrackerSheet(
-    clientName,
-    clientFolderId,
-    drive,
-    sheets
-  );
+  // 4. Create Lead Tracker Google Sheet (non-fatal if Sheets API not enabled)
+  let sheetUrl = "";
+  try {
+    sheetUrl = await createLeadTrackerSheet(
+      clientName,
+      clientFolderId,
+      drive,
+      sheets
+    );
+  } catch (sheetError) {
+    console.warn("Lead Tracker sheet creation failed (Sheets API may not be enabled):", sheetError);
+  }
 
   return { assetsFolderId, assetsFolderUrl, contractsFolderId, sheetUrl };
 }
