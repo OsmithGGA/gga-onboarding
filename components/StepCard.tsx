@@ -27,8 +27,8 @@ export default function StepCard({
     <div
       className={`
         border rounded-2xl overflow-hidden transition-all duration-300
-        ${completed ? "border-[#00d4aa]/30 bg-[#111]" : ""}
-        ${active && !completed ? "border-[#00d4aa]/60 bg-[#111] shadow-[0_0_30px_rgba(0,212,170,0.08)]" : ""}
+        ${completed ? "border-[#ADFF00]/30 bg-[#111]" : ""}
+        ${active && !completed ? "border-[#ADFF00]/60 bg-[#111] shadow-[0_0_30px_rgba(173,255,0,0.08)]" : ""}
         ${locked ? "border-[#1a1a1a] bg-[#0d0d0d]" : ""}
         ${!active && !completed && !locked ? "border-[#222] bg-[#111]" : ""}
       `}
@@ -43,8 +43,8 @@ export default function StepCard({
         <div
           className={`
             flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold transition-all duration-300
-            ${completed ? "bg-[#00d4aa] text-black" : ""}
-            ${active && !completed ? "bg-[#00d4aa]/20 border-2 border-[#00d4aa]" : ""}
+            ${completed ? "bg-[#ADFF00] text-black" : ""}
+            ${active && !completed ? "bg-[#ADFF00]/20 border-2 border-[#ADFF00]" : ""}
             ${locked ? "bg-[#1a1a1a] text-[#444]" : ""}
             ${!active && !completed && !locked ? "bg-[#1a1a1a] text-[#555]" : ""}
           `}
@@ -64,7 +64,7 @@ export default function StepCard({
               />
             </svg>
           ) : (
-            <span className={locked ? "text-[#333]" : "text-[#00d4aa]"}>
+            <span className={locked ? "text-[#333]" : "text-[#ADFF00]"}>
               {stepNumber}
             </span>
           )}
@@ -77,7 +77,7 @@ export default function StepCard({
             <h3
               className={`
                 font-semibold text-base truncate
-                ${completed ? "text-[#00d4aa]" : ""}
+                ${completed ? "text-[#ADFF00]" : ""}
                 ${active && !completed ? "text-white" : ""}
                 ${locked ? "text-[#444]" : ""}
                 ${!active && !completed && !locked ? "text-[#888]" : ""}
@@ -87,7 +87,7 @@ export default function StepCard({
             </h3>
           </div>
           {completed && (
-            <p className="text-xs text-[#00d4aa]/60 mt-0.5">Completed</p>
+            <p className="text-xs text-[#ADFF00]/60 mt-0.5">Completed</p>
           )}
           {locked && (
             <p className="text-xs text-[#444] mt-0.5">Complete previous steps first</p>
@@ -97,7 +97,7 @@ export default function StepCard({
         {/* Chevron */}
         {!locked && (
           <svg
-            className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 ${active ? "rotate-180 text-[#00d4aa]" : "text-[#444]"}`}
+            className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 ${active ? "rotate-180 text-[#ADFF00]" : "text-[#444]"}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -136,9 +136,9 @@ export default function StepCard({
       {completed && !active && (
         <div
           onClick={onToggle}
-          className="border-t border-[#00d4aa]/10 px-5 py-3 cursor-pointer hover:bg-[#00d4aa]/5 transition-colors"
+          className="border-t border-[#ADFF00]/10 px-5 py-3 cursor-pointer hover:bg-[#ADFF00]/5 transition-colors"
         >
-          <p className="text-xs text-[#00d4aa]/50">Click to review</p>
+          <p className="text-xs text-[#ADFF00]/50">Click to review</p>
         </div>
       )}
     </div>

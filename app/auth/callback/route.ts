@@ -31,5 +31,11 @@ export async function GET(request: NextRequest) {
     await supabase.auth.exchangeCodeForSession(code);
   }
 
+  // If this is a password recovery flow, redirect to the reset-password page
+  const type = requestUrl.searchParams.get("type");
+  if (type === "recovery") {
+    return NextResponse.redirect(`${origin}/auth/reset-password`);
+  }
+
   return NextResponse.redirect(`${origin}/portal`);
 }

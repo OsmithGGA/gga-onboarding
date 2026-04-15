@@ -31,7 +31,7 @@ function AdminLoginGate() {
     <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4">
       <div className="w-full max-w-sm bg-[#111] border border-[#222] rounded-2xl p-8">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-8 h-8 rounded-lg bg-[#00d4aa] flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-[#ADFF00] flex items-center justify-center">
             <span className="text-black font-bold text-sm">G</span>
           </div>
           <h1 className="text-white font-semibold">GGA Admin</h1>
@@ -53,13 +53,13 @@ function AdminLoginGate() {
               name="pw"
               required
               autoFocus
-              className="w-full bg-[#0a0a0a] border border-[#333] rounded-xl px-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#00d4aa] focus:ring-1 focus:ring-[#00d4aa] transition-colors"
+              className="w-full bg-[#0a0a0a] border border-[#333] rounded-xl px-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#ADFF00] focus:ring-1 focus:ring-[#ADFF00] transition-colors"
               placeholder="Enter admin password"
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-[#00d4aa] hover:bg-[#00bfa0] text-black font-semibold py-3 rounded-xl transition-all"
+            className="w-full bg-[#ADFF00] hover:bg-[#8FCC00] text-black font-semibold py-3 rounded-xl transition-all"
           >
             Access Admin
           </button>

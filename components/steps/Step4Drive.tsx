@@ -38,13 +38,13 @@ const UPLOAD_GUIDELINES = [
 export default function Step4Drive({ completed, completing, driveFolderUrl, onComplete }: Props) {
   if (completed) {
     return (
-      <div className="text-center py-4">
-        <div className="inline-flex items-center gap-2 text-[#00d4aa] text-sm font-medium">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Content uploaded. Our team will review your assets before the call.
-        </div>
+      <div className="flex items-start gap-3 p-5 bg-[#ADFF00]/5 border border-[#ADFF00]/20 rounded-xl">
+        <svg className="w-5 h-5 text-[#ADFF00] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p className="text-[#ADFF00] text-sm font-medium">
+          Content uploaded. Our team will review your assets ahead of your onboarding call.
+        </p>
       </div>
     );
   }
@@ -52,10 +52,16 @@ export default function Step4Drive({ completed, completing, driveFolderUrl, onCo
   return (
     <div className="space-y-6">
       {/* Intro */}
-      <div className="bg-[#00d4aa]/10 border border-[#00d4aa]/20 rounded-xl p-4">
-        <p className="text-sm text-[#00d4aa] font-medium mb-1">📁 Upload your brand assets</p>
-        <p className="text-sm text-[#888] leading-relaxed">
-          We{"'"}ve created a private Google Drive folder just for you. Upload your logo, photos, and any other brand materials there. The better the creative, the better your ads will perform — don{"'"}t skip this step!
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">📁</span>
+          <h3 className="text-white font-semibold text-base">Upload Your Brand Assets</h3>
+        </div>
+        <p className="text-[#888] text-sm leading-relaxed">
+          The creative quality of your ads has a direct impact on your results. The better the assets you provide, the stronger your campaign will be from day one.
+        </p>
+        <p className="text-[#888] text-sm leading-relaxed">
+          We&apos;ve created a private Google Drive folder exclusively for your business. Upload your assets there using the button below.
         </p>
       </div>
 
@@ -63,20 +69,43 @@ export default function Step4Drive({ completed, completing, driveFolderUrl, onCo
       <div>
         <h4 className="text-sm font-semibold text-white mb-3">What to upload</h4>
         <div className="space-y-2">
-          {UPLOAD_GUIDELINES.map((item, i) => (
-            <div
-              key={i}
-              className="flex gap-3 p-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl"
-            >
-              <span className="text-xl flex-shrink-0">{item.icon}</span>
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-white">{item.title}</p>
-                <p className="text-xs text-[#888] leading-relaxed mt-0.5">
-                  {item.description}
-                </p>
-              </div>
+          <div className="flex gap-3 p-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl">
+            <span className="text-xl flex-shrink-0">🖼️</span>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-white">Logo</p>
+              <p className="text-xs text-[#888] leading-relaxed mt-0.5">PNG file with a transparent background. Include any variations and brand guidelines if you have them.</p>
             </div>
-          ))}
+          </div>
+          <div className="flex gap-3 p-3 bg-[#0a0a0a] border border-[#ADFF00]/20 rounded-xl">
+            <span className="text-xl flex-shrink-0">📸</span>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-white">Photos <span className="text-[#ADFF00] text-xs ml-1">— Most Important</span></p>
+              <p className="text-xs text-[#888] leading-relaxed mt-0.5">This is the single biggest factor in your ad creative quality. Real photos consistently outperform stock imagery.</p>
+              <p className="text-xs text-[#888] leading-relaxed mt-1.5">Upload as many as you can. Aim for a minimum of 10. Best performing content includes:</p>
+              <ul className="text-xs text-[#777] mt-1.5 space-y-0.5 list-none">
+                <li>• Before and after shots — completed jobs</li>
+                <li>• Team on the job — on site, in uniform</li>
+                <li>• Finished work close-ups — high quality detail shots</li>
+                <li>• Happy customers at their property</li>
+                <li>• Your vehicles and equipment</li>
+                <li>• Team together — group shot or headshots</li>
+              </ul>
+            </div>
+          </div>
+          <div className="flex gap-3 p-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl">
+            <span className="text-xl flex-shrink-0">🎬</span>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-white">Videos <span className="text-[#555] text-xs ml-1">— Optional</span></p>
+              <p className="text-xs text-[#888] leading-relaxed mt-0.5">Short clips of your work, customer testimonials, or behind-the-scenes footage.</p>
+            </div>
+          </div>
+          <div className="flex gap-3 p-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl">
+            <span className="text-xl flex-shrink-0">📄</span>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-white">Previous Ad Creative <span className="text-[#555] text-xs ml-1">— Optional</span></p>
+              <p className="text-xs text-[#888] leading-relaxed mt-0.5">If you&apos;ve run ads before, upload anything that performed well — images, copy, anything useful.</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -86,14 +115,14 @@ export default function Step4Drive({ completed, completing, driveFolderUrl, onCo
           href={driveFolderUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-3 w-full bg-[#1a1a1a] hover:bg-[#222] border border-[#333] hover:border-[#00d4aa]/40 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 group"
+          className="flex items-center justify-center gap-3 w-full bg-[#1a1a1a] hover:bg-[#222] border border-[#333] hover:border-[#ADFF00]/40 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 group"
         >
-          <svg className="w-5 h-5 text-[#00d4aa]" viewBox="0 0 24 24" fill="currentColor">
+          <svg className="w-5 h-5 text-[#ADFF00]" viewBox="0 0 24 24" fill="currentColor">
             <path d="M6.28 3h11.44L22 11 12 21 2 11zm5.72 8l-4.14-7H6.86L3 11h4.14L9 8.28V11h3zm0 0v5.72L13.86 11H10v0z" />
           </svg>
           <span>Open My Google Drive Folder</span>
           <svg
-            className="w-4 h-4 text-[#555] group-hover:text-[#00d4aa] transition-colors ml-auto"
+            className="w-4 h-4 text-[#555] group-hover:text-[#ADFF00] transition-colors ml-auto"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -123,7 +152,7 @@ export default function Step4Drive({ completed, completing, driveFolderUrl, onCo
       <button
         onClick={onComplete}
         disabled={completing}
-        className="w-full bg-[#00d4aa] hover:bg-[#00bfa0] text-black font-semibold py-3 px-6 rounded-xl transition-all duration-200 hover:shadow-[0_0_20px_rgba(0,212,170,0.4)] disabled:opacity-50 text-sm"
+        className="w-full bg-[#ADFF00] hover:bg-[#8FCC00] text-black font-semibold py-3 px-6 rounded-xl transition-all duration-200 hover:shadow-[0_0_20px_rgba(173,255,0,0.4)] disabled:opacity-50 text-sm"
       >
         {completing ? (
           <span className="flex items-center justify-center gap-2">

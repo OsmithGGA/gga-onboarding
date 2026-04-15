@@ -1,163 +1,347 @@
 "use client";
 
+import { useState } from "react";
+import { CheckCircle, Loader2, ChevronDown, ChevronUp, ExternalLink, Mail } from "lucide-react";
+
+interface Client {
+  first_name?: string;
+  last_name?: string;
+  name?: string;
+  business_name?: string;
+  company?: string | null;
+}
+
 interface Props {
+  client: Client;
   completed: boolean;
   completing: boolean;
   onComplete: () => void;
 }
 
-const STEPS = [
+const GGA_BM_ID = process.env.NEXT_PUBLIC_GGA_BM_ID || "1042826013821113";
+
+const GUIDE_STEPS = [
   {
     number: 1,
-    title: "Go to Meta Business Suite",
-    description: (
-      <>
-        Visit{" "}
-        <a
-          href="https://business.facebook.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[#00d4aa] hover:underline"
-        >
-          business.facebook.com
-        </a>{" "}
-        and log in with the Facebook account that manages your business page.
-      </>
-    ),
+    title: "Open Meta Business Suite",
+    description:
+      "Go to business.facebook.com and log in with the Facebook account that manages your business page. Make sure you are logging in as the account owner or admin.",
   },
   {
     number: 2,
-    title: "Navigate to Business Settings",
+    title: "Go to Business Settings",
     description:
-      'Click the gear icon (⚙) in the bottom-left corner, then select "Business Settings" from the menu.',
+      "Click the gear icon ⚙️ in the bottom-left corner and select Business Settings from the menu.",
   },
   {
     number: 3,
-    title: "Go to Users → Partners",
+    title: "Link Your Facebook & Instagram Pages",
     description:
-      'In the left sidebar, click "Users" then "Partners". Click the blue "+ Add" button.',
+      "In Business Settings, click Accounts → Pages → + Add. Repeat for Instagram: click Accounts → Instagram Accounts → + Add.",
   },
   {
     number: 4,
-    title: "Enter GGA\'s Partner ID",
-    description: (
-      <>
-        Select <strong className="text-white">"Give a partner access to your assets"</strong> and enter our Business Manager ID:{" "}
-        <span className="font-mono text-[#00d4aa] bg-[#00d4aa]/10 px-2 py-0.5 rounded text-sm">
-          [YOUR BUSINESS MANAGER ID]
-        </span>
-      </>
-    ),
+    title: "Create or Confirm Your Ad Account",
+    description:
+      "Click Accounts → Ad Accounts → + Add. Name your ad account (this is internal only — nobody else sees it). Link your payment method (credit card) to the ad account — this is what Meta charges for your ad spend directly.",
   },
   {
     number: 5,
-    title: "Grant Ad Account Access",
-    description:
-      'Select your Ad Account from the list and toggle on "Manage campaigns". Click "Save Changes".',
+    title: "Add GGA as a Partner",
+    description: null, // rendered below with ID
   },
   {
     number: 6,
-    title: "Grant Facebook Page Access",
+    title: "Grant Ad Account Access",
     description:
-      'Go to "Pages" in the left panel, select your Facebook Page, and grant GGA "Advertise" access. Click "Save Changes".',
+      "Select Ad Accounts on the left. Select Assign Partners. Enter GGA's Business ID: " + GGA_BM_ID + ". Select the full access option.",
+  },
+  {
+    number: 7,
+    title: "Confirm Below",
+    description:
+      "Once both your Ad Account and Page access have been granted, hit the confirm button below.",
   },
 ];
 
-export default function Step3Meta({ completed, completing, onComplete }: Props) {
+const COMMON_ISSUES = [
+  {
+    q: "I don't have a Meta Business Manager set up",
+    a: "You'll need to create one before completing this step. Go to business.facebook.com and follow the setup prompts. It takes around 5 minutes. Reach out if you need help.",
+  },
+  {
+    q: "I can't find my Ad Account",
+    a: "In Business Settings go to Accounts → Ad Accounts and check it appears there. If not, create a new one using the steps above.",
+  },
+  {
+    q: "I'm getting a permission error",
+    a: "You may not be the admin on the account. Ask whoever manages your Facebook Business Page to complete this step, or reach out to us and we'll help you resolve it.",
+  },
+];
+
+export default function Step3Meta({ client, completed, completing, onComplete }: Props) {
+  const [selectedOption, setSelectedOption] = useState<"A" | "B" | null>(null);
+  const [openIssue, setOpenIssue] = useState<number | null>(null);
+
+  const businessName =
+    client.business_name || client.company || `${client.first_name || ""} ${client.last_name || ""}`.trim() || client.name || "My Business";
+
+  const emailSubject = encodeURIComponent(`Meta Login Details — ${businessName}`);
+  const emailBody = encodeURIComponent(
+    `Hi GGA,\n\nHere are my Meta Business Manager login details for the campaign setup:\n\nEmail: \nPassword: \n\nBusiness Name: ${businessName}\n\nPlease let me know once access is set up so I can change my password.\n\nThanks`
+  );
+  const mailtoLink = `mailto:osmith.greengrowthagency@gmail.com?subject=${emailSubject}&body=${emailBody}`;
+
   if (completed) {
     return (
-      <div className="text-center py-4">
-        <div className="inline-flex items-center gap-2 text-[#00d4aa] text-sm font-medium">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Meta Business Suite linked. We now have access to run your ads.
-        </div>
+      <div className="flex items-start gap-3 p-5 bg-[#ADFF00]/5 border border-[#ADFF00]/20 rounded-xl">
+        <CheckCircle className="w-5 h-5 text-[#ADFF00] flex-shrink-0 mt-0.5" />
+        <p className="text-[#ADFF00] text-sm font-medium">
+          Meta access confirmed. We&apos;re ready to launch your campaign.
+        </p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Intro */}
-      <div className="bg-[#00d4aa]/10 border border-[#00d4aa]/20 rounded-xl p-4">
-        <p className="text-sm text-[#00d4aa] font-medium mb-1">🔗 Why we need access</p>
+      {/* Info banner */}
+      <div className="bg-[#ADFF00]/5 border border-[#ADFF00]/20 rounded-xl p-4">
+        <p className="text-sm text-[#ADFF00] font-medium mb-1.5">
+          📋 Give Us Access To Run Your Ads
+        </p>
         <p className="text-sm text-[#888] leading-relaxed">
-          To run ads on your behalf, we need Partner access to your Meta Business Manager. This allows us to create and manage your ad campaigns without needing your personal login. Watch the video below and follow the steps — it takes about 3 minutes.
+          To run your campaign, we need Partner access to your Meta Business
+          Manager. This allows us to build and manage your ads on your behalf —
+          we never need your personal login details.
+        </p>
+        <p className="text-sm text-[#888] mt-2">
+          Choose the option that suits you best:
         </p>
       </div>
 
-      {/* Loom video embed */}
-      <div className="rounded-xl overflow-hidden border border-[#222] bg-[#0a0a0a] aspect-video flex items-center justify-center">
-        {/*
-          REPLACE THIS DIV with your Loom video embed.
-          It will look like:
-          <div style={{position:'relative', paddingBottom:'62.5%', height:0}}>
-            <iframe
-              src="https://www.loom.com/embed/YOUR_VIDEO_ID"
-              frameBorder="0"
-              allowFullScreen
-              style={{position:'absolute', top:0, left:0, width:'100%', height:'100%'}}
-            />
+      {/* Two-option cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Option A */}
+        <button
+          type="button"
+          onClick={() => setSelectedOption("A")}
+          className={`text-left p-5 rounded-xl border-2 transition-all duration-200 ${
+            selectedOption === "A"
+              ? "border-[#ADFF00] bg-[#ADFF00]/5"
+              : "border-[#222] bg-[#0d0d0d] hover:border-[#333]"
+          }`}
+        >
+          <div className="flex items-start justify-between mb-3">
+            <div className="text-2xl">🤝</div>
+            <div
+              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                selectedOption === "A"
+                  ? "border-[#ADFF00] bg-[#ADFF00]"
+                  : "border-[#444]"
+              }`}
+            >
+              {selectedOption === "A" && (
+                <svg className="w-2.5 h-2.5 text-black" fill="currentColor" viewBox="0 0 8 8">
+                  <circle cx="4" cy="4" r="3" />
+                </svg>
+              )}
+            </div>
           </div>
-        */}
-        <div className="text-center px-8 py-12">
-          <div className="text-4xl mb-4">🎬</div>
-          <p className="text-[#555] text-sm font-medium mb-2">Loom tutorial video goes here</p>
-          <p className="text-[#444] text-xs max-w-xs">
-            Replace with your Loom embed showing clients how to link Meta Business Suite
+          <p className="text-white font-semibold text-sm mb-1.5">
+            Option A — We&apos;ll Handle It For You
+          </p>
+          <p className="text-[#777] text-xs leading-relaxed">
+            If this sounds too technical, don&apos;t worry about it. Send us your
+            Meta login details and we&apos;ll take care of the full setup before
+            your onboarding call.
+          </p>
+        </button>
+
+        {/* Option B */}
+        <button
+          type="button"
+          onClick={() => setSelectedOption("B")}
+          className={`text-left p-5 rounded-xl border-2 transition-all duration-200 ${
+            selectedOption === "B"
+              ? "border-[#ADFF00] bg-[#ADFF00]/5"
+              : "border-[#222] bg-[#0d0d0d] hover:border-[#333]"
+          }`}
+        >
+          <div className="flex items-start justify-between mb-3">
+            <div className="text-2xl">🛠️</div>
+            <div
+              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                selectedOption === "B"
+                  ? "border-[#ADFF00] bg-[#ADFF00]"
+                  : "border-[#444]"
+              }`}
+            >
+              {selectedOption === "B" && (
+                <svg className="w-2.5 h-2.5 text-black" fill="currentColor" viewBox="0 0 8 8">
+                  <circle cx="4" cy="4" r="3" />
+                </svg>
+              )}
+            </div>
+          </div>
+          <p className="text-white font-semibold text-sm mb-1.5">
+            Option B — Complete It Yourself
+          </p>
+          <p className="text-[#777] text-xs leading-relaxed">
+            Follow the step-by-step guide below at your own pace. If you&apos;d
+            prefer to do it together on your onboarding call, have the
+            checklist below ready beforehand.
+          </p>
+        </button>
+      </div>
+
+      {/* Option A content */}
+      {selectedOption === "A" && (
+        <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-5 space-y-4">
+          <p className="text-sm text-[#888] leading-relaxed">
+            Send us your Meta login details directly and we&apos;ll take care of
+            the full setup before your onboarding call.
+          </p>
+          <a
+            href={mailtoLink}
+            className="inline-flex items-center gap-2 bg-[#ADFF00] hover:bg-[#8FCC00] text-black font-bold text-sm py-2.5 px-5 rounded-xl transition-colors"
+          >
+            <Mail className="w-4 h-4" />
+            Email Us Your Login Details
+          </a>
+          <p className="text-xs text-[#555] leading-relaxed">
+            Your details are kept strictly confidential and only used to complete
+            this step. Once access is set up we&apos;ll confirm with you and you
+            can change your password immediately after.
           </p>
         </div>
-      </div>
+      )}
+
+      {/* Option B content */}
+      {selectedOption === "B" && (
+        <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-5 space-y-4">
+          <div>
+            <p className="text-sm text-[#888] mb-3 leading-relaxed">
+              If you&apos;d prefer to do it together on your onboarding call,
+              make sure you have the following ready beforehand:
+            </p>
+            <div className="space-y-2 mb-4">
+              {[
+                "Logged into Meta Business Suite on your laptop — business.facebook.com",
+                "You are the admin on the account",
+                "Your Facebook Business Page is visible in your account",
+                "Your Ad Account is linked to your Business Manager",
+              ].map((item, i) => (
+                <div key={i} className="flex items-start gap-2.5">
+                  <div className="w-4 h-4 rounded border border-[#333] flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-[#888]">{item}</p>
+                </div>
+              ))}
+            </div>
+            <a
+              href="https://business.facebook.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-[#ADFF00] text-sm font-medium hover:underline"
+            >
+              Open Meta Business Suite
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Step-by-step guide */}
       <div>
         <h4 className="text-sm font-semibold text-white mb-4">
-          Step-by-step guide
+          Step-by-Step Guide
         </h4>
         <div className="space-y-3">
-          {STEPS.map((step) => (
+          {GUIDE_STEPS.map((step) => (
             <div
               key={step.number}
               className="flex gap-4 p-4 bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl"
             >
-              <div className="flex-shrink-0 w-7 h-7 rounded-full bg-[#00d4aa]/20 border border-[#00d4aa]/40 flex items-center justify-center text-[#00d4aa] text-xs font-bold">
+              <div className="flex-shrink-0 w-7 h-7 rounded-full bg-[#ADFF00]/15 border border-[#ADFF00]/30 flex items-center justify-center text-[#ADFF00] text-xs font-bold">
                 {step.number}
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-medium text-white mb-1">{step.title}</p>
-                <p className="text-xs text-[#888] leading-relaxed">{step.description}</p>
+                <p className="text-sm font-medium text-white mb-1">
+                  {step.title}
+                </p>
+                {step.number === 5 ? (
+                  <p className="text-xs text-[#888] leading-relaxed">
+                    Go to Partners in the left panel. Click + Add → Give Partner
+                    Access. Enter GGA&apos;s Business Partner ID:{" "}
+                    <span className="font-mono text-[#ADFF00] bg-[#ADFF00]/10 px-2 py-0.5 rounded">
+                      {GGA_BM_ID}
+                    </span>
+                    . Once entered, allow access to everything.
+                  </p>
+                ) : (
+                  <p className="text-xs text-[#888] leading-relaxed">
+                    {step.description}
+                  </p>
+                )}
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Stuck? */}
-      <div className="bg-[#1a1a1a] border border-[#222] rounded-xl p-4">
-        <p className="text-xs text-[#888]">
-          <span className="text-white font-medium">Stuck?</span> No worries — WhatsApp or email us and we{"'"}ll walk you through it on a quick screen share.
-        </p>
+      {/* Common Issues accordion */}
+      <div>
+        <h4 className="text-sm font-semibold text-white mb-3">
+          Common Issues
+        </h4>
+        <div className="space-y-2">
+          {COMMON_ISSUES.map((issue, i) => (
+            <div
+              key={i}
+              className="border border-[#1a1a1a] rounded-xl overflow-hidden"
+            >
+              <button
+                type="button"
+                onClick={() => setOpenIssue(openIssue === i ? null : i)}
+                className="w-full flex items-center justify-between p-4 text-left hover:bg-[#0d0d0d] transition-colors"
+              >
+                <p className="text-sm text-white font-medium pr-4">{issue.q}</p>
+                {openIssue === i ? (
+                  <ChevronUp className="w-4 h-4 text-[#555] flex-shrink-0" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-[#555] flex-shrink-0" />
+                )}
+              </button>
+              {openIssue === i && (
+                <div className="px-4 pb-4">
+                  <p className="text-sm text-[#888] leading-relaxed">{issue.a}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Complete button */}
+      {/* Confirm button */}
       <button
         onClick={onComplete}
-        disabled={completing}
-        className="w-full bg-[#00d4aa] hover:bg-[#00bfa0] text-black font-semibold py-3 px-6 rounded-xl transition-all duration-200 hover:shadow-[0_0_20px_rgba(0,212,170,0.4)] disabled:opacity-50 text-sm"
+        disabled={completing || selectedOption === null}
+        className="w-full bg-[#ADFF00] hover:bg-[#8FCC00] disabled:opacity-30 disabled:cursor-not-allowed text-black font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm"
       >
         {completing ? (
-          <span className="flex items-center justify-center gap-2">
-            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-            </svg>
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
             Saving...
-          </span>
+          </>
         ) : (
           "✅ I've completed this"
         )}
       </button>
+      {selectedOption === null && (
+        <p className="text-[#555] text-xs text-center -mt-2">
+          Select an option above before confirming
+        </p>
+      )}
     </div>
   );
 }

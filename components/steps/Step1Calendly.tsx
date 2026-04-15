@@ -14,13 +14,13 @@ export default function Step1Calendly({ completed, completing, onComplete }: Pro
 
   if (completed) {
     return (
-      <div className="text-center py-4">
-        <div className="inline-flex items-center gap-2 text-[#00d4aa] text-sm font-medium">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Your onboarding call is booked. We look forward to speaking with you!
-        </div>
+      <div className="flex items-start gap-3 p-5 bg-[#ADFF00]/5 border border-[#ADFF00]/20 rounded-xl">
+        <svg className="w-5 h-5 text-[#ADFF00] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p className="text-[#ADFF00] text-sm font-medium">
+          Onboarding call booked. We&apos;ll see you then — come with any questions.
+        </p>
       </div>
     );
   }
@@ -28,10 +28,19 @@ export default function Step1Calendly({ completed, completing, onComplete }: Pro
   return (
     <div className="space-y-6">
       {/* Info banner */}
-      <div className="bg-[#00d4aa]/10 border border-[#00d4aa]/20 rounded-xl p-4">
-        <p className="text-sm text-[#00d4aa] font-medium mb-1">📅 Book your onboarding call</p>
-        <p className="text-sm text-[#888] leading-relaxed">
-          If you haven't already scheduled your onboarding call with the GGA team, please do so now using the calendar below. This call is where we walk through your campaign strategy and get everything set up.
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">📅</span>
+          <h3 className="text-white font-semibold text-base">Book Your Onboarding Call</h3>
+        </div>
+        <p className="text-[#888] text-sm leading-relaxed">
+          Your onboarding call is where we walk through your campaign strategy together, answer any questions from the portal, and make sure everything is set up for a strong launch.
+        </p>
+        <p className="text-[#888] text-sm leading-relaxed">
+          If you haven&apos;t already booked your call, use the calendar below to pick a time that suits you. The call takes around 30 minutes and is with your dedicated GGA account manager.
+        </p>
+        <p className="text-[#888] text-sm">
+          If Keelan or Oran has already scheduled a time with you directly, simply confirm below and move on to the next step.
         </p>
       </div>
 
@@ -55,7 +64,7 @@ export default function Step1Calendly({ completed, completing, onComplete }: Pro
               onComplete("Booked via portal");
             }}
             disabled={completing}
-            className="flex-1 bg-[#00d4aa] hover:bg-[#00bfa0] text-black font-semibold py-3 px-6 rounded-xl transition-all duration-200 hover:shadow-[0_0_20px_rgba(0,212,170,0.4)] disabled:opacity-50 text-sm"
+            className="flex-1 bg-[#ADFF00] hover:bg-[#8FCC00] text-black font-semibold py-3 px-6 rounded-xl transition-all duration-200 hover:shadow-[0_0_20px_rgba(173,255,0,0.4)] disabled:opacity-50 text-sm"
           >
             {completing ? "Saving..." : "✅ I've just booked my call"}
           </button>
@@ -71,7 +80,7 @@ export default function Step1Calendly({ completed, completing, onComplete }: Pro
           </button>
         </div>
       ) : (
-        <div className="flex items-center gap-2 text-[#00d4aa] text-sm">
+        <div className="flex items-center gap-2 text-[#ADFF00] text-sm">
           <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />

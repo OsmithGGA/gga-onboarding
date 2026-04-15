@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 100" width="380" height="100">
+  <rect width="380" height="100" fill="#000000"/>
+
+  <!-- Left arrow -->
+  <text x="10" y="68" font-family="Arial Black, Impact, sans-serif" font-weight="900" font-size="38" fill="#ADFF00">&#x2794;</text>
+
+  <!-- GREEN -->
+  <text x="58" y="48" font-family="Arial Black, Impact, sans-serif" font-weight="900" font-size="36" fill="#FFFFFF" letter-spacing="2">GREEN</text>
+
+  <!-- GROWTH -->
+  <text x="58" y="82" font-family="Arial Black, Impact, sans-serif" font-weight="900" font-size="36" fill="#FFFFFF" letter-spacing="2">GROWTH</text>
+
+  <!-- AGENCY -->
+  <text x="60" y="96" font-family="Arial Black, Impact, sans-serif" font-weight="900" font-size="12" fill="#ADFF00" letter-spacing="4">AGENCY</text>
+
+  <!-- Swoosh circle arc -->
+  <path d="M 308,18 C 345,8 368,32 360,58 C 352,80 328,90 308,82"
+        stroke="#ADFF00" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+  <!-- Arrow tip on swoosh -->
+  <polyline points="298,76 310,85 304,97"
+            stroke="#ADFF00" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
