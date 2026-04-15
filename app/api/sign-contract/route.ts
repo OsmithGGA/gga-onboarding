@@ -343,17 +343,24 @@ export async function POST(request: Request) {
     }
 
     // Record step 0 completion
-    await adminSupabase.from("step_completions").upsert(
-      {
+    const { error: insertError } = await adminSupabase
+      .from("step_completions")
+      .insert({
         client_id: clientId,
         step_number: 0,
         signature_name: signatureName,
         signature_ip: ip,
         pdf_drive_url: pdfUrl || null,
         completed_by: "client",
-      },
-      { onConflict: "client_id,step_number" }
-    );
+      });
+
+    if (insertError) {
+      console.error("step_completions insert failed:", insertError);
+      return NextResponse.json(
+        { error: `Failed to save signature: ${insertError.message}` },
+        { status: 500 }
+      );
+    }
 
     // Log to activity
     await adminSupabase.from("client_activity_log").insert({

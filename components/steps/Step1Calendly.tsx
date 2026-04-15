@@ -48,7 +48,7 @@ export default function Step1Calendly({ completed, completing, onComplete }: Pro
           id="o0cWsep2uBig9iH9Nogy_1776208534477"
         />
       </div>
-      <Script src="https://link.msgsndr.com/js/form_embed.js" strategy="lazyOnload" />
+      <Script src="https://link.msgsndr.com/js/form_embed.js" strategy="afterInteractive" />
 
       {/* Action buttons — only show if not yet completed */}
       {!completed && (
