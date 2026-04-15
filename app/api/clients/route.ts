@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     }
 
     const supabase = createAdminClient();
-    const fullName = `${firstName} ${lastName}`;
+    const fullName = `${firstName.trim()} ${lastName.trim()}`;
 
     // 1. Create Supabase auth user (email_confirm: true skips confirmation email)
     const { data: userData, error: userError } =
