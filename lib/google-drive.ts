@@ -18,7 +18,7 @@ function getAuth() {
 //   /Clients/{ClientName}/
 //     /{ClientName} Assets/   ← shared with client (writer), link goes in Step 4
 //     /Contracts/             ← not shared with client, signed PDFs stored here
-//     Lead Tracker — {ClientName}  ← Google Sheet with pre-populated headers
+//     Lead Tracker - {ClientName}  ← Google Sheet with pre-populated headers
 
 export async function createClientFolderStructure(
   clientName: string,
@@ -59,15 +59,20 @@ export async function createClientFolderStructure(
   const assetsFolderUrl = assetsFolder.data.webViewLink!;
 
   // Share assets folder with client (writer — can upload)
-  await drive.permissions.create({
-    fileId: assetsFolderId,
-    requestBody: {
-      role: "writer",
-      type: "user",
-      emailAddress: clientEmail,
-    },
-    sendNotificationEmail: false,
-  });
+  // Silently skip if clientEmail isn't a Google account
+  try {
+    await drive.permissions.create({
+      fileId: assetsFolderId,
+      requestBody: {
+        role: "writer",
+        type: "user",
+        emailAddress: clientEmail,
+      },
+      sendNotificationEmail: false,
+    });
+  } catch {
+    console.warn(`Could not share Drive folder with ${clientEmail} — not a Google account. Admin can share manually.`);
+  }
 
   // 3. Create Contracts subfolder — not shared with client
   const contractsFolder = await drive.files.create({
@@ -102,7 +107,7 @@ async function createLeadTrackerSheet(
   // Create the spreadsheet (lands in root Drive initially)
   const spreadsheet = await sheets.spreadsheets.create({
     requestBody: {
-      properties: { title: `Lead Tracker — ${clientName}` },
+      properties: { title: `Lead Tracker - ${clientName}` },
     },
     fields: "spreadsheetId, spreadsheetUrl",
   });
