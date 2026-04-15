@@ -331,7 +331,6 @@ export async function POST(request: Request) {
         signature_ip: ip,
         pdf_drive_url: pdfUrl || null,
         completed_by: "client",
-        note: `Signed digitally by ${signatureName}`,
       },
       { onConflict: "client_id,step_number" }
     );

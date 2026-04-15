@@ -1,4 +1,18 @@
-<div style="font-family: Georgia, serif; color: #e0e0e0; line-height: 1.7; max-width: 100%;">
+<style>
+  @media (max-width: 600px) {
+    .contract-parties th, .contract-parties td,
+    .contract-fees th, .contract-fees td,
+    .contract-sigs th, .contract-sigs td {
+      display: block !important;
+      width: 100% !important;
+      box-sizing: border-box;
+    }
+    .contract-dates { flex-direction: column !important; }
+    .contract-dates > div { margin-bottom: 8px; }
+    .contract-parties thead, .contract-sigs thead { display: none !important; }
+  }
+</style>
+<div style="font-family: Georgia, serif; color: #e0e0e0; line-height: 1.7; max-width: 100%; font-size: 14px;">
 
   <!-- Header -->
   <div style="text-align: center; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 2px solid #ADFF00;">
@@ -8,7 +22,7 @@
   </div>
 
   <!-- Parties Table -->
-  <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 14px;">
+  <table class="contract-parties" style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 14px;">
     <thead>
       <tr>
         <th style="background: #1a1a1a; color: #ADFF00; padding: 10px 14px; text-align: left; font-size: 12px; letter-spacing: 1px; width: 50%; border: 1px solid #333;">AGENCY</th>
@@ -36,7 +50,7 @@
   </table>
 
   <!-- Dates -->
-  <div style="display: flex; gap: 16px; margin-bottom: 32px; font-size: 13px;">
+  <div class="contract-dates" style="display: flex; gap: 16px; margin-bottom: 32px; font-size: 13px;">
     <div style="flex: 1; background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 12px 16px;">
       <span style="color: #666;">Agreement Date:</span> <strong style="color: #fff;">{SignatureDate}</strong>
     </div>
@@ -74,7 +88,7 @@
   <!-- Section 3 -->
   <h2 style="font-size: 15px; font-weight: 700; color: #ffffff; margin: 28px 0 10px; letter-spacing: 0.5px;">3. FEES &amp; PAYMENT SCHEDULE</h2>
   <p style="margin: 0 0 16px; color: #aaa; font-size: 14px;">All fees below are for GGA's services only and are entirely separate from the Client's Meta ad spend.</p>
-  <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 12px;">
+  <table class="contract-fees" style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 12px;">
     <thead>
       <tr>
         <th style="background: #1a1a1a; color: #fff; padding: 10px 14px; text-align: left; border: 1px solid #333; font-weight: 600;">Payment</th>
@@ -172,7 +186,7 @@
 
   <!-- Signatures -->
   <h2 style="font-size: 15px; font-weight: 700; color: #ffffff; margin: 0 0 16px; letter-spacing: 0.5px;">SIGNATURES</h2>
-  <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+  <table class="contract-sigs" style="width: 100%; border-collapse: collapse; font-size: 14px;">
     <thead>
       <tr>
         <th style="background: #1a1a1a; color: #ADFF00; padding: 10px 14px; text-align: left; border: 1px solid #333; font-size: 12px; letter-spacing: 0.5px; width: 50%;">ON BEHALF OF GREEN GROWTH SOLUTIONS<br><span style="color: #888; font-weight: 400;">(t/a Green Growth Agency)</span></th>

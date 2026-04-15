@@ -251,7 +251,6 @@ export async function PATCH(request: Request) {
             client_id: clientId,
             step_number: stepNumber,
             completed_by: "admin",
-            note: "Manually completed by admin",
           },
           { onConflict: "client_id,step_number" }
         );
