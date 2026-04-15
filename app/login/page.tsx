@@ -60,14 +60,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center px-4">
       {/* Logo / Header */}
       <div className="mb-10 text-center">
-        <div className="inline-flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-[#ADFF00] flex items-center justify-center">
-            <span className="text-black font-bold text-lg">G</span>
-          </div>
-          <span className="text-white font-semibold text-xl tracking-tight">
-            Green Growth Agency
-          </span>
-        </div>
+        <img src="/logo.png" alt="Green Growth Agency" className="h-12 w-auto mx-auto mb-4" />
         <p className="text-[#888] text-sm">
           {mode === "login"
             ? "Log in to access your onboarding portal"
