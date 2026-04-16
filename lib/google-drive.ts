@@ -98,7 +98,7 @@ export async function createClientFolderStructure(
       sheets
     );
   } catch (sheetError) {
-    console.warn("Lead Tracker sheet creation failed (Sheets API may not be enabled):", sheetError);
+    console.error("Lead Tracker sheet creation failed:", JSON.stringify(sheetError, null, 2));
   }
 
   return { assetsFolderId, assetsFolderUrl, contractsFolderId, sheetUrl };
@@ -127,13 +127,15 @@ async function createLeadTrackerSheet(
   const fileMetadata = await drive.files.get({
     fileId: spreadsheetId,
     fields: "parents",
+    supportsAllDrives: true,
   });
   const previousParents = (fileMetadata.data.parents || []).join(",");
   await drive.files.update({
     fileId: spreadsheetId,
     addParents: parentFolderId,
-    removeParents: previousParents,
+    removeParents: previousParents || undefined,
     fields: "id, parents",
+    supportsAllDrives: true,
   });
 
   const sheetId = 0; // default Sheet1

@@ -81,12 +81,12 @@ export default function InfoSection({ country, currency, businessName, sheetUrl 
               href={sheetUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-[#ADFF00] text-sm font-medium hover:underline"
+              className="inline-flex items-center gap-2 bg-[#ADFF00] hover:bg-[#8FCC00] text-black font-semibold text-sm px-4 py-2.5 rounded-xl transition-colors"
             >
               📊 Open My Lead Tracker →
             </a>
           ) : (
-            <p className="text-xs text-[#555]">Your lead tracker link will be shared on your onboarding call.</p>
+            <p className="text-xs text-[#555]">Your lead tracker is being set up — your GGA account manager will share the link with you directly.</p>
           )}
           <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-4">
             <p className="text-xs font-medium text-white mb-2">Why this matters</p>
