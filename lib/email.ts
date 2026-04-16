@@ -14,7 +14,9 @@ function getTransporter() {
     return null;
   }
   return nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
     auth: { user, pass },
   });
 }
