@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
-import { uploadContractPdf } from "@/lib/google-drive";
 import { sendContractSignedNotification, notifyStepComplete } from "@/lib/email";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 
@@ -342,24 +341,9 @@ export async function POST(request: Request) {
 
     const pdfBytes = await pdfDoc.save();
 
-    // Upload to Google Drive
-    let pdfUrl = "";
     const safeDate = signedAt.toISOString().split("T")[0];
     const fileName = `${clientName}_Contract_${safeDate}.pdf`;
-    if (client.drive_contracts_folder_id) {
-      try {
-        pdfUrl = await uploadContractPdf(
-          client.drive_contracts_folder_id,
-          fileName,
-          pdfBytes
-        );
-        console.log("PDF uploaded to Drive:", pdfUrl);
-      } catch (driveErr) {
-        console.error("PDF upload to Drive failed:", driveErr);
-      }
-    } else {
-      console.warn("drive_contracts_folder_id not set for client — skipping Drive upload");
-    }
+    const pdfUrl = "";
 
     // Record step 0 completion
     const { error: insertError } = await adminSupabase

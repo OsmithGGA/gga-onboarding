@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 
 const FROM = "Green Growth Agency <onboarding@resend.dev>";
+const REPLY_TO = "osmith.greengrowthagency@gmail.com";
 const NOTIFICATION_EMAIL = process.env.NOTIFICATION_EMAIL || "oransmith03@gmail.com";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://gga-onboarding2.vercel.app";
 
@@ -51,6 +52,7 @@ export async function sendWelcomeEmail(
 
   await resend.emails.send({
     from: FROM,
+    replyTo: REPLY_TO,
     to: client.email,
     subject: "Action Required — Complete Your Onboarding Portal Before Your Call",
     html: `
@@ -129,6 +131,7 @@ export async function sendContractSignedNotification(
 
   await resend.emails.send({
     from: FROM,
+    replyTo: REPLY_TO,
     to: NOTIFICATION_EMAIL,
     subject: `📝 Contract Signed — ${businessName}`,
     attachments: pdfAttachment
@@ -191,6 +194,7 @@ export async function notifyStepComplete(
 
   await resend.emails.send({
     from: FROM,
+    replyTo: REPLY_TO,
     to: NOTIFICATION_EMAIL,
     subject: `✅ ${businessName} completed Step ${stepNumber}: ${stepName}`,
     html: `
@@ -240,6 +244,7 @@ export async function notifyAllStepsComplete(client: {
 
   await resend.emails.send({
     from: FROM,
+    replyTo: REPLY_TO,
     to: NOTIFICATION_EMAIL,
     subject: `✅ Onboarding Complete — ${businessName} (${countryLabel})`,
     html: `
@@ -298,6 +303,7 @@ export async function sendPasswordResetEmail(
 
   await resend.emails.send({
     from: FROM,
+    replyTo: REPLY_TO,
     to: clientEmail,
     subject: "Reset Your GGA Portal Password",
     html: `
