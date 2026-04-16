@@ -290,3 +290,51 @@ export async function PATCH(request: Request) {
     );
   }
 }
+
+export async function DELETE(request: Request) {
+  if (!isAdmin(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const clientId = searchParams.get("clientId");
+
+    if (!clientId) {
+      return NextResponse.json({ error: "clientId required" }, { status: 400 });
+    }
+
+    const supabase = createAdminClient();
+
+    // Fetch client to get auth user_id
+    const { data: client } = await supabase
+      .from("clients")
+      .select("user_id")
+      .eq("id", clientId)
+      .single();
+
+    if (!client) {
+      return NextResponse.json({ error: "Client not found" }, { status: 404 });
+    }
+
+    // Delete client row (cascades to step_completions, client_activity_log)
+    const { error: deleteError } = await supabase
+      .from("clients")
+      .delete()
+      .eq("id", clientId);
+
+    if (deleteError) {
+      return NextResponse.json({ error: deleteError.message }, { status: 500 });
+    }
+
+    // Delete auth user
+    if (client.user_id) {
+      await supabase.auth.admin.deleteUser(client.user_id);
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("delete-client error:", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}

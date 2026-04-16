@@ -45,6 +45,22 @@ function htmlToPlainText(html: string): string {
     .trim();
 }
 
+// Replace non-ASCII characters that pdf-lib StandardFonts can't render
+function sanitizeForPdf(text: string): string {
+  return text
+    .replace(/[—–]/g, "-")
+    .replace(/['']/g, "'")
+    .replace(/[""]/g, '"')
+    .replace(/…/g, "...")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&apos;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/[^\x00-\xFF]/g, "");
+}
+
 // Wrap text into lines that fit within maxWidth
 function wrapText(text: string, font: Awaited<ReturnType<typeof PDFDocument.prototype.embedFont>>, fontSize: number, maxWidth: number): string[] {
   const lines: string[] = [];
@@ -220,7 +236,7 @@ export async function POST(request: Request) {
     y -= 24;
 
     // Contract body (plain text)
-    const plainText = htmlToPlainText(interpolated);
+    const plainText = sanitizeForPdf(htmlToPlainText(interpolated));
     const bodyLines = wrapText(plainText, helvetica, 10, contentWidth);
     const lineHeight = 14;
 
@@ -289,7 +305,7 @@ export async function POST(request: Request) {
       }
     }
 
-    page.drawText(`Signed by: ${signatureName}`, {
+    page.drawText(`Signed by: ${sanitizeForPdf(signatureName)}`, {
       x: margin,
       y,
       font: helveticaBold,
@@ -316,7 +332,7 @@ export async function POST(request: Request) {
     });
     y -= 16;
 
-    page.drawText(`Client: ${clientName} | Business: ${businessName}`, {
+    page.drawText(`Client: ${sanitizeForPdf(clientName)} | Business: ${sanitizeForPdf(businessName)}`, {
       x: margin,
       y,
       font: helvetica,

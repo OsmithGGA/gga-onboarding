@@ -163,6 +163,25 @@ export default function AdminClient({ adminPassword }: { adminPassword: string }
     alert("Password reset email sent to client.");
   };
 
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const handleDeleteClient = async (clientId: string) => {
+    setDeleteLoading(true);
+    const res = await fetch(`/api/clients?clientId=${clientId}`, {
+      method: "DELETE",
+      headers: authHeaders,
+    });
+    setDeleteLoading(false);
+    if (res.ok) {
+      setDeleteConfirmId(null);
+      fetchClients();
+    } else {
+      const data = await res.json();
+      alert(`Delete failed: ${data.error || "Unknown error"}`);
+    }
+  };
+
   const handleOverrideStep = async (mark: "complete" | "incomplete") => {
     if (!overrideClient) return;
     setOverrideLoading(true);
@@ -400,6 +419,13 @@ export default function AdminClient({ adminPassword }: { adminPassword: string }
                                 Drive
                               </a>
                             )}
+                            <button
+                              onClick={() => setDeleteConfirmId(client.id)}
+                              title="Delete client"
+                              className="text-xs px-2 py-1 rounded-lg bg-[#1a1a1a] hover:bg-red-900/40 text-[#555] hover:text-red-400 border border-[#222] transition-colors"
+                            >
+                              Delete
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -617,6 +643,33 @@ export default function AdminClient({ adminPassword }: { adminPassword: string }
       )}
 
       {/* Override Step Modal */}
+      {/* Delete confirmation modal */}
+      {deleteConfirmId && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center px-4">
+          <div className="w-full max-w-sm bg-[#0d0d0d] border border-red-900/40 rounded-2xl p-6">
+            <h2 className="text-base font-bold text-white mb-3">Delete Client?</h2>
+            <p className="text-sm text-[#888] mb-6">
+              This will permanently delete the client record, all their step completions, activity log, and their login account. This cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleDeleteClient(deleteConfirmId)}
+                disabled={deleteLoading}
+                className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white font-bold py-2.5 rounded-xl text-sm transition-colors"
+              >
+                {deleteLoading ? "Deleting..." : "Yes, Delete"}
+              </button>
+              <button
+                onClick={() => setDeleteConfirmId(null)}
+                className="flex-1 bg-[#1a1a1a] hover:bg-[#222] border border-[#333] text-white font-medium py-2.5 rounded-xl text-sm transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {overrideClient && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center px-4">
           <div className="w-full max-w-sm bg-[#0d0d0d] border border-[#1a1a1a] rounded-2xl p-6">
