@@ -344,18 +344,21 @@ export async function POST(request: Request) {
 
     // Upload to Google Drive
     let pdfUrl = "";
+    const safeDate = signedAt.toISOString().split("T")[0];
+    const fileName = `${clientName}_Contract_${safeDate}.pdf`;
     if (client.drive_contracts_folder_id) {
-      const safeDate = signedAt.toISOString().split("T")[0];
-      const fileName = `${clientName}_Contract_${safeDate}.pdf`;
       try {
         pdfUrl = await uploadContractPdf(
           client.drive_contracts_folder_id,
           fileName,
           pdfBytes
         );
+        console.log("PDF uploaded to Drive:", pdfUrl);
       } catch (driveErr) {
         console.error("PDF upload to Drive failed:", driveErr);
       }
+    } else {
+      console.warn("drive_contracts_folder_id not set for client — skipping Drive upload");
     }
 
     // Record step 0 completion
@@ -390,36 +393,37 @@ export async function POST(request: Request) {
       },
     });
 
-    // Send notifications (fire and forget)
-    sendContractSignedNotification(
-      {
-        first_name: client.first_name || "",
-        last_name: client.last_name || "",
-        business_name: businessName,
-        email: client.email,
-        country: client.country,
-      },
-      {
-        signedAt: signatureTimestamp,
-        ip,
-        signatureName,
-        pdfUrl: pdfUrl || "#",
-      },
-      {
-        filename: `${clientName}_Contract_${signedAt.toISOString().split("T")[0]}.pdf`,
-        content: Buffer.from(pdfBytes),
-      }
-    ).catch(console.error);
-
-    notifyStepComplete(
-      {
-        first_name: client.first_name || "",
-        last_name: client.last_name || "",
-        business_name: businessName,
-        email: client.email,
-      },
-      0
-    ).catch(console.error);
+    // Send notifications (awaited so Vercel doesn't kill them before they complete)
+    await Promise.allSettled([
+      sendContractSignedNotification(
+        {
+          first_name: client.first_name || "",
+          last_name: client.last_name || "",
+          business_name: businessName,
+          email: client.email,
+          country: client.country,
+        },
+        {
+          signedAt: signatureTimestamp,
+          ip,
+          signatureName,
+          pdfUrl: pdfUrl || "#",
+        },
+        {
+          filename: fileName,
+          content: Buffer.from(pdfBytes),
+        }
+      ),
+      notifyStepComplete(
+        {
+          first_name: client.first_name || "",
+          last_name: client.last_name || "",
+          business_name: businessName,
+          email: client.email,
+        },
+        0
+      ),
+    ]);
 
     return NextResponse.json({ success: true, pdfUrl });
   } catch (err) {
