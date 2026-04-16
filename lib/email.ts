@@ -1,24 +1,16 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
-const FROM_NAME = "Green Growth Agency";
-const FROM_ADDRESS = process.env.GMAIL_USER || "osmith.greengrowthagency@gmail.com";
-const FROM = `${FROM_NAME} <${FROM_ADDRESS}>`;
-const NOTIFICATION_EMAIL = process.env.NOTIFICATION_EMAIL || FROM_ADDRESS;
+const FROM = "Green Growth Agency <onboarding@resend.dev>";
+const NOTIFICATION_EMAIL = process.env.NOTIFICATION_EMAIL || "oransmith03@gmail.com";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://gga-onboarding2.vercel.app";
 
-function getTransporter() {
-  const user = process.env.GMAIL_USER;
-  const pass = process.env.GMAIL_APP_PASSWORD;
-  if (!user || !pass) {
-    console.warn("[email] GMAIL_USER or GMAIL_APP_PASSWORD not set — emails disabled");
+function getResend() {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) {
+    console.warn("[email] RESEND_API_KEY not set — emails disabled");
     return null;
   }
-  return nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-    auth: { user, pass },
-  });
+  return new Resend(key);
 }
 
 const emailBase = `
@@ -51,13 +43,13 @@ export async function sendWelcomeEmail(
   },
   password: string
 ) {
-  const transporter = getTransporter();
-  if (!transporter) return;
+  const resend = getResend();
+  if (!resend) return;
 
   const firstName = client.first_name;
   const businessName = client.business_name || `${client.first_name} ${client.last_name}`;
 
-  await transporter.sendMail({
+  await resend.emails.send({
     from: FROM,
     to: client.email,
     subject: "Action Required — Complete Your Onboarding Portal Before Your Call",
@@ -105,7 +97,7 @@ export async function sendWelcomeEmail(
 
         <p style="font-size: 15px; color: #aaaaaa; margin: 0 0 4px;">We're looking forward to speaking with you.</p>
         <p style="font-size: 15px; color: #fff; font-weight: 600; margin: 0 0 4px;">Oran & Keelan</p>
-        <p style="font-size: 13px; color: #555; margin: 0;">Green Growth Agency &nbsp;·&nbsp; ${FROM_ADDRESS}</p>
+        <p style="font-size: 13px; color: #555; margin: 0;">Green Growth Agency &nbsp;·&nbsp; osmith.greengrowthagency@gmail.com</p>
       </div>
     `,
   });
@@ -129,13 +121,13 @@ export async function sendContractSignedNotification(
   },
   pdfAttachment?: { filename: string; content: Buffer }
 ) {
-  const transporter = getTransporter();
-  if (!transporter) return;
+  const resend = getResend();
+  if (!resend) return;
 
   const clientName = `${client.first_name} ${client.last_name}`;
   const businessName = client.business_name || clientName;
 
-  await transporter.sendMail({
+  await resend.emails.send({
     from: FROM,
     to: NOTIFICATION_EMAIL,
     subject: `📝 Contract Signed — ${businessName}`,
@@ -189,15 +181,15 @@ export async function notifyStepComplete(
   },
   stepNumber: number
 ) {
-  const transporter = getTransporter();
-  if (!transporter) return;
+  const resend = getResend();
+  if (!resend) return;
 
   const clientName = `${client.first_name} ${client.last_name}`;
   const businessName = client.business_name || clientName;
   const stepName = STEP_NAMES[stepNumber] || `Step ${stepNumber}`;
   const percent = Math.round(((stepNumber + 1) / 5) * 100);
 
-  await transporter.sendMail({
+  await resend.emails.send({
     from: FROM,
     to: NOTIFICATION_EMAIL,
     subject: `✅ ${businessName} completed Step ${stepNumber}: ${stepName}`,
@@ -233,8 +225,8 @@ export async function notifyAllStepsComplete(client: {
   email: string;
   country: string;
 }) {
-  const transporter = getTransporter();
-  if (!transporter) return;
+  const resend = getResend();
+  if (!resend) return;
 
   const clientName = `${client.first_name} ${client.last_name}`;
   const businessName = client.business_name || clientName;
@@ -246,7 +238,7 @@ export async function notifyAllStepsComplete(client: {
       : "United States";
   const now = new Date().toLocaleString("en-IE", { timeZone: "Europe/Dublin" });
 
-  await transporter.sendMail({
+  await resend.emails.send({
     from: FROM,
     to: NOTIFICATION_EMAIL,
     subject: `✅ Onboarding Complete — ${businessName} (${countryLabel})`,
@@ -301,10 +293,10 @@ export async function sendPasswordResetEmail(
   clientFirstName: string,
   resetLink: string
 ) {
-  const transporter = getTransporter();
-  if (!transporter) return;
+  const resend = getResend();
+  if (!resend) return;
 
-  await transporter.sendMail({
+  await resend.emails.send({
     from: FROM,
     to: clientEmail,
     subject: "Reset Your GGA Portal Password",
