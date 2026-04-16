@@ -343,7 +343,34 @@ export async function POST(request: Request) {
 
     const safeDate = signedAt.toISOString().split("T")[0];
     const fileName = `${clientName}_Contract_${safeDate}.pdf`;
-    const pdfUrl = "";
+    let pdfUrl = "";
+
+    // Upload PDF to Supabase Storage
+    try {
+      // Create bucket if it doesn't exist (silently ignore "already exists" error)
+      await adminSupabase.storage
+        .createBucket("contracts", { public: true, fileSizeLimit: 20971520 })
+        .catch(() => {});
+
+      const storagePath = `${clientId}/${fileName}`;
+      const { error: uploadError } = await adminSupabase.storage
+        .from("contracts")
+        .upload(storagePath, pdfBytes, {
+          contentType: "application/pdf",
+          upsert: true,
+        });
+
+      if (!uploadError) {
+        const { data: { publicUrl } } = adminSupabase.storage
+          .from("contracts")
+          .getPublicUrl(storagePath);
+        pdfUrl = publicUrl;
+      } else {
+        console.error("Storage upload failed:", uploadError);
+      }
+    } catch (storageErr) {
+      console.error("Storage error:", storageErr);
+    }
 
     // Record step 0 completion
     const { error: insertError } = await adminSupabase

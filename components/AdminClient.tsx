@@ -10,6 +10,7 @@ interface StepCompletion {
   step_number: number;
   completed_at: string;
   completed_by: string;
+  pdf_drive_url?: string | null;
 }
 
 interface Client {
@@ -388,6 +389,20 @@ export default function AdminClient({ adminPassword }: { adminPassword: string }
                         </td>
                         <td className="px-4 py-4">
                           <div className="flex gap-1 flex-wrap">
+                            {(() => {
+                              const contractStep = client.step_completions?.find((sc) => sc.step_number === 0);
+                              return contractStep?.pdf_drive_url ? (
+                                <a
+                                  href={contractStep.pdf_drive_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  title="Download signed contract PDF"
+                                  className="text-xs px-2 py-1 rounded-lg bg-[#ADFF00]/10 hover:bg-[#ADFF00]/20 text-[#ADFF00] border border-[#ADFF00]/30 transition-colors"
+                                >
+                                  Contract
+                                </a>
+                              ) : null;
+                            })()}
                             <button
                               onClick={() => handleResendWelcome(client.id)}
                               title="Send password reset email"

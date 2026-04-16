@@ -140,8 +140,8 @@ export async function POST(request: Request) {
       },
     });
 
-    // 6. Send welcome email (fire and forget)
-    sendWelcomeEmail(
+    // 6. Send welcome email (awaited so Vercel doesn't kill it before it completes)
+    await sendWelcomeEmail(
       {
         first_name: firstName,
         last_name: lastName,
@@ -174,7 +174,7 @@ export async function GET(request: Request) {
 
     let query = supabase
       .from("clients")
-      .select(`*, step_completions(step_number, completed_at, completed_by)`)
+      .select(`*, step_completions(step_number, completed_at, completed_by, pdf_drive_url)`)
       .order("created_at", { ascending: false });
 
     if (countryFilter && countryFilter !== "all") {

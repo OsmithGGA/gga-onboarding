@@ -1,17 +1,24 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-const FROM = "Green Growth Agency <onboarding@resend.dev>";
-const REPLY_TO = "osmith.greengrowthagency@gmail.com";
-const NOTIFICATION_EMAIL = process.env.NOTIFICATION_EMAIL || "oransmith03@gmail.com";
+const FROM_NAME = "Green Growth Agency";
+const FROM_ADDRESS = process.env.GMAIL_USER || "osmith.greengrowthagency@gmail.com";
+const FROM = `${FROM_NAME} <${FROM_ADDRESS}>`;
+const NOTIFICATION_EMAIL = process.env.NOTIFICATION_EMAIL || FROM_ADDRESS;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://gga-onboarding2.vercel.app";
 
-function getResend() {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) {
-    console.warn("[email] RESEND_API_KEY not set — emails disabled");
+function getTransporter() {
+  const user = process.env.GMAIL_USER;
+  const pass = process.env.GMAIL_APP_PASSWORD;
+  if (!user || !pass) {
+    console.warn("[email] GMAIL_USER or GMAIL_APP_PASSWORD not set — emails disabled");
     return null;
   }
-  return new Resend(key);
+  return nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    auth: { user, pass },
+  });
 }
 
 const emailBase = `
@@ -44,15 +51,14 @@ export async function sendWelcomeEmail(
   },
   password: string
 ) {
-  const resend = getResend();
-  if (!resend) return;
+  const transporter = getTransporter();
+  if (!transporter) return;
 
   const firstName = client.first_name;
   const businessName = client.business_name || `${client.first_name} ${client.last_name}`;
 
-  await resend.emails.send({
+  await transporter.sendMail({
     from: FROM,
-    replyTo: REPLY_TO,
     to: client.email,
     subject: "Action Required — Complete Your Onboarding Portal Before Your Call",
     html: `
@@ -99,7 +105,7 @@ export async function sendWelcomeEmail(
 
         <p style="font-size: 15px; color: #aaaaaa; margin: 0 0 4px;">We're looking forward to speaking with you.</p>
         <p style="font-size: 15px; color: #fff; font-weight: 600; margin: 0 0 4px;">Oran & Keelan</p>
-        <p style="font-size: 13px; color: #555; margin: 0;">Green Growth Agency &nbsp;·&nbsp; osmith.greengrowthagency@gmail.com</p>
+        <p style="font-size: 13px; color: #555; margin: 0;">Green Growth Agency &nbsp;·&nbsp; ${FROM_ADDRESS}</p>
       </div>
     `,
   });
@@ -123,23 +129,22 @@ export async function sendContractSignedNotification(
   },
   pdfAttachment?: { filename: string; content: Buffer }
 ) {
-  const resend = getResend();
-  if (!resend) return;
+  const transporter = getTransporter();
+  if (!transporter) return;
 
   const clientName = `${client.first_name} ${client.last_name}`;
   const businessName = client.business_name || clientName;
 
-  await resend.emails.send({
+  await transporter.sendMail({
     from: FROM,
-    replyTo: REPLY_TO,
     to: NOTIFICATION_EMAIL,
-    subject: `📝 Contract Signed — ${businessName}`,
+    subject: `Contract Signed - ${businessName}`,
     attachments: pdfAttachment
       ? [{ filename: pdfAttachment.filename, content: pdfAttachment.content }]
       : [],
     html: `
       <div style="${emailBase}">
-        ${logoHeader}<h1 style="margin: 0 0 24px; font-size: 20px; color: ${accentColor};">📝 Contract Signed</h1>
+        ${logoHeader}<h1 style="margin: 0 0 24px; font-size: 20px; color: ${accentColor};">Contract Signed</h1>
 
         <p style="font-size: 15px; color: #aaaaaa; line-height: 1.7; margin: 0 0 24px;">
           <strong style="color: #fff;">${clientName}</strong> from <strong style="color: #fff;">${businessName}</strong> has signed their client agreement.
@@ -149,13 +154,10 @@ export async function sendContractSignedNotification(
           <p style="margin: 0 0 10px; color: #ccc; font-size: 14px;"><span style="color: #666;">Signed name:</span> &nbsp;${details.signatureName}</p>
           <p style="margin: 0 0 10px; color: #ccc; font-size: 14px;"><span style="color: #666;">Signed at:</span> &nbsp;${details.signedAt}</p>
           <p style="margin: 0 0 10px; color: #ccc; font-size: 14px;"><span style="color: #666;">IP Address:</span> &nbsp;${details.ip}</p>
-          <p style="margin: 0; color: #ccc; font-size: 14px;"><span style="color: #666;">Contract saved to:</span> &nbsp;/Clients/${clientName}/Contracts/</p>
+          ${details.pdfUrl ? `<p style="margin: 0; color: #ccc; font-size: 14px;"><span style="color: #666;">Contract URL:</span> &nbsp;<a href="${details.pdfUrl}" style="color: ${accentColor};">Download PDF</a></p>` : ""}
         </div>
 
-        <div style="display: flex; gap: 12px; margin-top: 24px;">
-          <a href="${details.pdfUrl}" style="display: inline-block; background: ${accentColor}; color: #000; font-weight: 700; font-size: 14px; padding: 12px 24px; border-radius: 8px; text-decoration: none;">
-            View Contract in Google Drive →
-          </a>
+        <div style="margin-top: 24px;">
           <a href="${SITE_URL}/admin" style="display: inline-block; background: #1a1a1a; color: #fff; font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 8px; text-decoration: none; border: 1px solid #333;">
             View Client in Admin Panel →
           </a>
@@ -184,22 +186,21 @@ export async function notifyStepComplete(
   },
   stepNumber: number
 ) {
-  const resend = getResend();
-  if (!resend) return;
+  const transporter = getTransporter();
+  if (!transporter) return;
 
   const clientName = `${client.first_name} ${client.last_name}`;
   const businessName = client.business_name || clientName;
   const stepName = STEP_NAMES[stepNumber] || `Step ${stepNumber}`;
   const percent = Math.round(((stepNumber + 1) / 5) * 100);
 
-  await resend.emails.send({
+  await transporter.sendMail({
     from: FROM,
-    replyTo: REPLY_TO,
     to: NOTIFICATION_EMAIL,
-    subject: `✅ ${businessName} completed Step ${stepNumber}: ${stepName}`,
+    subject: `${businessName} completed Step ${stepNumber}: ${stepName}`,
     html: `
       <div style="${emailBase}">
-        ${logoHeader}<h1 style="margin: 0 0 24px; font-size: 20px; color: ${accentColor};">✅ Step Complete</h1>
+        ${logoHeader}<h1 style="margin: 0 0 24px; font-size: 20px; color: ${accentColor};">Step Complete</h1>
         <p style="font-size: 16px; margin: 0 0 8px;">
           <strong style="color: #fff;">${clientName}</strong>
           <span style="color: #666;"> (${client.email})</span>
@@ -229,8 +230,8 @@ export async function notifyAllStepsComplete(client: {
   email: string;
   country: string;
 }) {
-  const resend = getResend();
-  if (!resend) return;
+  const transporter = getTransporter();
+  if (!transporter) return;
 
   const clientName = `${client.first_name} ${client.last_name}`;
   const businessName = client.business_name || clientName;
@@ -242,17 +243,16 @@ export async function notifyAllStepsComplete(client: {
       : "United States";
   const now = new Date().toLocaleString("en-IE", { timeZone: "Europe/Dublin" });
 
-  await resend.emails.send({
+  await transporter.sendMail({
     from: FROM,
-    replyTo: REPLY_TO,
     to: NOTIFICATION_EMAIL,
-    subject: `✅ Onboarding Complete — ${businessName} (${countryLabel})`,
+    subject: `Onboarding Complete - ${businessName} (${countryLabel})`,
     html: `
       <div style="${emailBase}">
-        ${logoHeader}<h1 style="margin: 0 0 24px; font-size: 22px; color: ${accentColor}; text-align: center;">🎉 Onboarding Complete</h1>
+        ${logoHeader}<h1 style="margin: 0 0 24px; font-size: 22px; color: ${accentColor}; text-align: center;">Onboarding Complete</h1>
 
         <p style="font-size: 15px; color: #aaaaaa; line-height: 1.7; margin: 0 0 24px; text-align: center;">
-          <strong style="color: #fff;">${clientName}</strong> from <strong style="color: #fff;">${businessName}</strong> has completed their onboarding portal in full. All steps are done and their campaign is ready to move forward.
+          <strong style="color: #fff;">${clientName}</strong> from <strong style="color: #fff;">${businessName}</strong> has completed their onboarding portal in full.
         </p>
 
         <div style="background: #111; border: 1px solid #222; border-radius: 10px; padding: 20px; margin: 0 0 24px;">
@@ -273,14 +273,6 @@ export async function notifyAllStepsComplete(client: {
           <p style="margin: 0; color: #ccc; font-size: 14px;">✅ Content uploaded</p>
         </div>
 
-        <div style="background: #111; border: 1px solid #222; border-radius: 10px; padding: 20px; margin: 0 0 24px;">
-          <p style="margin: 0 0 12px; color: #666; font-size: 13px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600;">Next Steps</p>
-          <p style="margin: 0 0 6px; color: #ccc; font-size: 14px;">→ Review onboarding form responses</p>
-          <p style="margin: 0 0 6px; color: #ccc; font-size: 14px;">→ Confirm Meta access is in place</p>
-          <p style="margin: 0 0 6px; color: #ccc; font-size: 14px;">→ Review uploaded assets</p>
-          <p style="margin: 0; color: #ccc; font-size: 14px;">→ Prepare campaign build ahead of onboarding call</p>
-        </div>
-
         <div style="text-align: center;">
           <a href="${SITE_URL}/admin" style="display: inline-block; background: ${accentColor}; color: #000; font-weight: 700; font-size: 14px; padding: 12px 24px; border-radius: 8px; text-decoration: none;">
             View Client in Admin Panel →
@@ -298,12 +290,11 @@ export async function sendPasswordResetEmail(
   clientFirstName: string,
   resetLink: string
 ) {
-  const resend = getResend();
-  if (!resend) return;
+  const transporter = getTransporter();
+  if (!transporter) return;
 
-  await resend.emails.send({
+  await transporter.sendMail({
     from: FROM,
-    replyTo: REPLY_TO,
     to: clientEmail,
     subject: "Reset Your GGA Portal Password",
     html: `
