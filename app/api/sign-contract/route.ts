@@ -404,6 +404,10 @@ export async function POST(request: Request) {
         ip,
         signatureName,
         pdfUrl: pdfUrl || "#",
+      },
+      {
+        filename: `${clientName}_Contract_${signedAt.toISOString().split("T")[0]}.pdf`,
+        content: Buffer.from(pdfBytes),
       }
     ).catch(console.error);
 

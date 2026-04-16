@@ -124,7 +124,8 @@ export async function sendContractSignedNotification(
     ip: string;
     signatureName: string;
     pdfUrl: string;
-  }
+  },
+  pdfAttachment?: { filename: string; content: Buffer }
 ) {
   const transporter = getTransporter();
   if (!transporter) return;
@@ -136,6 +137,9 @@ export async function sendContractSignedNotification(
     from: FROM,
     to: NOTIFICATION_EMAIL,
     subject: `📝 Contract Signed — ${businessName}`,
+    attachments: pdfAttachment
+      ? [{ filename: pdfAttachment.filename, content: pdfAttachment.content }]
+      : [],
     html: `
       <div style="${emailBase}">
         ${logoHeader}<h1 style="margin: 0 0 24px; font-size: 20px; color: ${accentColor};">📝 Contract Signed</h1>
